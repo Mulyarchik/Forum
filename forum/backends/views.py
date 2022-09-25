@@ -1,3 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
+from .models import Thread, Post, User
+
+def backends(request):
+    thread = Thread.objects.all()
+
