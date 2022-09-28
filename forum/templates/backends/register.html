@@ -25,6 +25,9 @@
                     <ul><li><h6>Your password must contain at least 8 characters.</h6></li></ul>
                 </div>
                 <div class="mb-3">
+                    <ul><li><h6>Your password can't be a commonly used password.</h6></li></ul>
+                </div>
+                <div class="mb-3">
                     <ul><li><h6>Your password can't be entirely numeric.</h6></li></ul>
                 </div>
             </div>
@@ -37,33 +40,6 @@
                     {{ user_form.as_p }}
                     <button type="submit" class="btn btn-primary col-md-4">Register</button>
                 </form>
-                    <div class="mb-3">
-                        <label for="validationServer01" class="form-label">Name and Surname:</label>
-                        <input type="text" class="form-control is-valid" id="validationServer01" required>
-                    </div>
-                    <label for="validationServerUsername" class="form-label">Username</label>
-                    <div class="input-group has-validation">
-                        <span class="input-group-text" id="inputGroupPrepend3">@</span>
-                        <input type="text" class="form-control is-invalid" id="validationServerUsername"
-                               aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback" required>
-                        <div id="validationServerUsernameFeedback" class="invalid-feedback">
-                            Please choose a username.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="validationServer03" class="form-label">Email</label>
-                        <input type="email" class="form-control is-valid" id="validationServer03"
-                               placeholder="name@example.com">
-                    </div>
-                    <div class="mb-3">
-                        <label for="validationServer04" class="form-label">Password</label>
-                        <input type="password" class="form-control is-valid" id="validationServer04" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="validationServer05" class="form-label">Repeat Password</label>
-                        <input type="password" class="form-control is-valid" id="validationServer05" required>
-                    </div>
-                    <button type="button" class="btn btn-primary col-md-4">Register</button>
             </div>
         </div>
     </div>

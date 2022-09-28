@@ -1,13 +1,15 @@
 from django.conf import settings
-from django.contrib.auth.models import User
+
 from django.db import models
 
-User._meta.get_field('email')._unique = True
-User._meta.get_field('email').blank = False
-User._meta.get_field('email').null = False
 
-User._meta.get_field('first_name').blank = False
-User._meta.get_field('first_name').null = False
+# from django.contrib.auth.models import User
+# User._meta.get_field('email')._unique = True
+# User._meta.get_field('email').blank = False
+# User._meta.get_field('email').null = False
+# User._meta.get_field('email').required = True
+# User._meta.get_field('first_name').blank = False
+# User._meta.get_field('first_name').null = False
 
 
 class Thread(models.Model):
