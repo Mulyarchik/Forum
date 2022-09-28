@@ -1,8 +1,18 @@
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
+
+User._meta.get_field('email')._unique = True
+User._meta.get_field('email').blank = False
+User._meta.get_field('email').null = False
+
+User._meta.get_field('first_name').blank = False
+User._meta.get_field('first_name').null = False
+
 
 class Thread(models.Model):
     title = models.CharField(max_length=500, verbose_name='Article title')
-    author = models.ForeignKey('User', on_delete=models.CASCADE, blank=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True)
     created_at = models.DateField(auto_now_add=True, verbose_name='Asked')
     updated_at = models.DateField(auto_now=True, verbose_name='Modified ')
 
@@ -16,7 +26,7 @@ class Thread(models.Model):
 
 class Post(models.Model):
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
-    author = models.ForeignKey('User', on_delete=models.CASCADE, blank=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True)
     content = models.CharField(max_length=1000, verbose_name='Content')
     created_at = models.DateField(auto_now_add=True, verbose_name='Asked')
     updated_at = models.DateField(auto_now=True, verbose_name='Modified')
@@ -24,18 +34,3 @@ class Post(models.Model):
     class Meta:
         verbose_name = 'Post'
         verbose_name_plural = 'Posts'
-
-
-class User(models.Model):
-    name = models.CharField(max_length=30, verbose_name='Name')
-    surname = models.CharField(max_length=30, verbose_name='Surname')
-    email = models.EmailField(max_length=50, verbose_name='Email')
-    nickname = models.CharField(max_length=20, verbose_name='Nickname')
-
-    def __str__(self):
-        return self.nickname
-
-    class Meta:
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
-

@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'backends.apps.BackendsConfig',
 ]
 
+#AUTH_USER_MODEL = 'backends.My_User'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -123,6 +125,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+DJOSER = {
+    "USER_ID_FIELD": "username",
+    "LOGIN_FIELD": "email"
+}
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
