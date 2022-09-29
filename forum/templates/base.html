@@ -20,12 +20,21 @@
                     <a class="nav-link active" aria-current="page" href="#">Home</a>
                 </li>
             </ul>
-            <div class="d-flex" id="sign_in">
+            {% if request.user.is_authenticated %}
+            <div class="d-flex" id="loginned">
+                <ul class="me-auto mb-lg-0">
+                    Добро пожаловать, {{ user.username }}
+                    <a class="btn btn-primary" href="/logout" role="button">LogOut</a>
+                </ul>
+            </div>
+            {% else %}
+            <div class="d-flex" id="not_loginned">
                 <ul class="me-auto mb-lg-0">
                     <a class="btn btn-link" href="/login" role="button">Sign In</a>
                     <a class="btn btn-primary" href="/register" role="button">Sing Up</a>
                 </ul>
             </div>
+            {% endif %}
         </div>
     </div>
 </nav>

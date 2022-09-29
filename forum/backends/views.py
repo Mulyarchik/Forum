@@ -1,11 +1,12 @@
 from django.contrib import messages
+from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
 
-from .forms import UserForm
+from .forms import UserForm, LoginUserForm
 from .models import Thread
 
 
-def mycreate_user(request):
+def user_registation(request):
     error = ''
     if request.method == 'POST':
         user_form = UserForm(request.POST)
@@ -29,8 +30,21 @@ def mycreate_user(request):
     return render(request, 'backends/register.html', context)
 
 
-def login(request):
-    return render(request, 'backends/login.html')
+def user_login(request):
+    if request.method == 'POST':
+        form = LoginUserForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('/')
+    else:
+        form = LoginUserForm()
+    return render(request, 'backends/login.html', {'form': form})
+
+
+def user_logout(request):
+    logout(request)
+    return redirect('/')
 
 
 def backends(request):
