@@ -1,12 +1,50 @@
 {% extends "base.html" %}
-{% block title %}Sign in to NickForum{% endblock %}
 
+{% block title %}
+Sign in to NickForum
+{% endblock %}
 
 {% block content %}
+<section>
+    <div class="container-lg">
+        <div class="row">
+            <div class="col-sm-5 col-md-6">
+                <div class="mb-3">
+                </div>
+                <div class="mb-5">
+                </div>
+                <div class="mb-3">
+                    <ul>
+                        <li><h6>Your password can't be too simular </h6></li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <ul>
+                        <li><h6>Your password must contain at least 8 characters.</h6></li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <ul>
+                        <li><h6>Your password can't be a commonly used password.</h6></li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <ul>
+                        <li><h6>Your password can't be entirely numeric.</h6></li>
+                    </ul>
+                </div>
+            </div>
 
-<form action="." method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary col-md-4">Log In</button>
-</form>
+            <div class="col-sm-5 offset-sm-2 col-md-6 offset-md-0">
+                <div class="mb-3">
+                </div>
+                <form action="." method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary col-md-4">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

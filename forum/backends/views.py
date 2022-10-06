@@ -1,9 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
-
-from .forms import UserForm, LoginUserForm
-from .models import Thread
+from django.views.generic import ListView, DetailView, CreateView
+from django.urls import reverse_lazy, reverse
+from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate
+from .models import Question, Answer
 
 
 def user_registation(request):
@@ -47,6 +50,48 @@ def user_logout(request):
     return redirect('/')
 
 
+# !!!! id title username created_at
 def backends(request):
-    thread = Thread.objects.all()
-    return render(request, 'backends/backends.html', {'thread': thread, 'title': 'Список новостей'})
+    questions = Question.objects.all()
+    context = {
+        'thread': questions,
+        'title': 'список новостей'
+    }
+    return render(request, 'backends/backends.html', context=context)
+
+
+@login_required
+def ask_a_guestion(request):
+    if request.method == "POST":
+        form = QuestionCreate(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.author = request.user
+            question.save()
+            return redirect('/')
+    else:
+        form = QuestionCreate()
+    return render(request, 'backends/create_post.html', locals())
+
+
+
+def view_question(request, question_id):
+    question = Question.objects.get(pk=question_id)
+    try:
+        answer = Answer.objects.get(pk=question_id)
+        return render(request, 'backends/view_thread.html', {'question': question, 'answer': answer})
+    except ObjectDoesNotExist:
+        return render(request, 'backends/view_thread.html', {'question': question})
+
+@login_required
+def add_answer(request):
+    if request.method == "POST":
+        form_answer = AnswerCreate(request.POST)
+        if form_answer.is_valid():
+            question = form_answer.save(commit=False)
+            question.author = request.user
+            question.save()
+            return redirect('/')
+    else:
+        form_answer = AnswerCreate()
+    return render(request, 'backends/test.html', locals())

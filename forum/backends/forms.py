@@ -3,13 +3,13 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.forms import TextInput
 
+from .models import Question, Answer, CommentToAnswer
 
-# from django.core.exceptions import ValidationError
 
 class UserForm(UserCreationForm):
     email = forms.EmailField(required=True, label='Email')
     first_name = forms.CharField(required=True, label='First Name')
-    last_name = forms.CharField(required=True, label='First Name')
+    last_name = forms.CharField(required=True, label='Last Name')
 
     class Meta:
         model = User
@@ -72,13 +72,45 @@ class UserForm(UserCreationForm):
 class LoginUserForm(AuthenticationForm):
     username = forms.CharField(
         label=("Username or Email"),
-        widget=forms.TextInput(attrs={'class': 'form-input',
+        widget=forms.TextInput(attrs={'class': 'form-control',
                                       'type': 'text',
                                       'required': 'true',
                                       }))
     password = forms.CharField(
         label=("Password"),
-        widget=forms.PasswordInput(attrs={'class': 'form-input',
-                                          'type': 'text',
+        widget=forms.PasswordInput(attrs={'class': 'form-control',
+                                          'type': 'password',
                                           'required': 'true',
                                           }))
+
+
+class QuestionCreate(forms.ModelForm):
+    title = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'type': 'text',
+            'required': 'true',
+        }))
+
+    content = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'type': 'text',
+            'required': 'true',
+        }))
+
+    class Meta:
+        model = Question
+        exclude = ["author", "created_at"]
+        fields = ("title", "content",)
+
+
+class AnswerCreate(forms.ModelForm):
+    content = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'type': 'text',
+            'required': 'true',
+        })),
+
+    class Meta:
+        model = Answer
+        exclude = ["author", "created_at"]
+        fields = ("content",)

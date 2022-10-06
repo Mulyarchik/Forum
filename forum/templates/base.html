@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}My amazing site{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link rel="stylesheet" href="../static/static_files/css/styles.css">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg bg-light">
+<nav class="navbar navbar-expand-lg bg-light" id="navbar">
     <div class="container-xl">
         <a class="navbar-brand" href="/"><img src="../media/logo.png" width="40" height="33" alt="logo">NickForum</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -17,11 +18,22 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    <a class="nav-link active" aria-current="page" href="#">About Us</a>
                 </li>
+                {% if request.user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/create">Create Post</a>
+                </li>
+                {% endif %}
             </ul>
+            <div class="flex-grow-1 d-flex">
+                <form class="d-flex mx-lg-auto" role="search" id="search" align="center">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
             {% if request.user.is_authenticated %}
-            <div class="d-flex" id="loginned">
+            <div class="search" id="loginned">
                 <ul class="me-auto mb-lg-0">
                     Добро пожаловать, {{ user.username }}
                     <a class="btn btn-primary" href="/logout" role="button">LogOut</a>
@@ -30,7 +42,7 @@
             {% else %}
             <div class="d-flex" id="not_loginned">
                 <ul class="me-auto mb-lg-0">
-                    <a class="btn btn-link" href="/login" role="button">Sign In</a>
+                    <a class="btn btn-link" href="/login" role="button" style="text-decoration: none;">Sign In</a>
                     <a class="btn btn-primary" href="/register" role="button">Sing Up</a>
                 </ul>
             </div>
@@ -54,7 +66,7 @@
 {% endif %}
 
 <div id="content">
-    {% block content %}{% endblock %}
+    {% block content %} {% endblock %}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"

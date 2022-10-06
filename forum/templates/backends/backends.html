@@ -1,9 +1,21 @@
- {% extends "base.html" %}
- {% block title %}NickForum - Way to the dream{% endblock %}
+{% extends "base.html" %}
+{% block title %}
+NickForum - Way to the dream
+{% endblock %}
 
 
- {% block content %}
-
- <h5>Hi, World</h5>
-
- {% endblock %}
+{% block content %}
+{% for item in thread %}
+<div class="container-xl">
+    <div class="card mb-3 mt-4">
+        <a class="item" href="{{ item.get_absolute_url }}">
+            <div class="card-body">
+                <p class="card-text">{{ item.title }}</p>
+                <p class="card-text"><small class="text-muted">{{ item.author.username }}
+                     {{ item.created_at }}</small></p>
+            </div>
+        </a>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
