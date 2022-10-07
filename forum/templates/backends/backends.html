@@ -8,7 +8,7 @@ NickForum - Way to the dream
 {% for item in thread %}
 <div class="container-xl">
     <div class="card mb-3 mt-4">
-        <a class="item" href="{{ item.get_absolute_url }}">
+        <a class="item" href="{{ item.get_absolute_url }}" style="text-decoration: none;" >
             <div class="card-body">
                 <p class="card-text">{{ item.title }}</p>
                 <p class="card-text"><small class="text-muted">{{ item.author.username }}

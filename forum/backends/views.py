@@ -3,8 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, CreateView
-from django.urls import reverse_lazy, reverse
+
 from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate
 from .models import Question, Answer
 
@@ -74,24 +73,32 @@ def ask_a_guestion(request):
     return render(request, 'backends/create_post.html', locals())
 
 
-
+@login_required
 def view_question(request, question_id):
     question = Question.objects.get(pk=question_id)
-    try:
-        answer = Answer.objects.get(pk=question_id)
-        return render(request, 'backends/view_thread.html', {'question': question, 'answer': answer})
-    except ObjectDoesNotExist:
-        return render(request, 'backends/view_thread.html', {'question': question})
 
-@login_required
-def add_answer(request):
     if request.method == "POST":
         form_answer = AnswerCreate(request.POST)
         if form_answer.is_valid():
-            question = form_answer.save(commit=False)
-            question.author = request.user
-            question.save()
+            answer = form_answer.save(commit=False)
+            answer.author = request.user
+            answer.question_id = question.pk
+            answer.save()
             return redirect('/')
     else:
         form_answer = AnswerCreate()
-    return render(request, 'backends/test.html', locals())
+
+    try:
+        answer = Answer.objects.all().filter(question_id=question.pk)
+        context = {
+            'answer': answer,
+            'question': question,
+            'form_answer': form_answer
+        }
+        return render(request, 'backends/view_thread.html', context=context)
+    except ObjectDoesNotExist:
+        context = {
+            'question': question,
+            'form_answer': form_answer
+        }
+        return render(request, 'backends/view_thread.html', context=context)

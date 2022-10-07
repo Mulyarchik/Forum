@@ -11,6 +11,6 @@ urlpatterns = [
     path('login/', user_login, name='login'),
     path('logout/', user_logout, name='logout'),
     path('create/', ask_a_guestion, name='ask_a_guestion'),
-    path('thread/<int:question_id>/', view_question, name='post'),
-    path('post/<int:question_id>/add_answer', add_answer, name='add_answer')
-]
+    path('thread/<int:question_id>/', view_question, name='post')
+    #path('thread/<int:question_id>/', add_answer, name='abra'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

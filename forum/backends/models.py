@@ -23,7 +23,7 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True)
     content = models.CharField(max_length=1000, verbose_name='Content')
     created_at = models.DateField(auto_now_add=True, verbose_name='Asked')
