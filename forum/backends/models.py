@@ -22,19 +22,16 @@ class Question(models.Model):
         verbose_name_plural = 'Questions'
 
 
-class Answer(models.Model):
+class Comment(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True)
-    content = models.CharField(max_length=1000, verbose_name='Content')
+    content = models.CharField(max_length=1000, verbose_name='Comment')
     created_at = models.DateField(auto_now_add=True, verbose_name='Asked')
+    reply = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='Replies')
 
     class Meta:
-        verbose_name = 'Answer'
-        verbose_name_plural = 'Answers'
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
 
-
-class CommentToAnswer(models.Model):
-    comment_to_answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True)
-    content = models.CharField(max_length=1000, verbose_name='Content')
-    created_at = models.DateField(auto_now_add=True, verbose_name='Asked')
+    def __str__(self):
+        return self.content

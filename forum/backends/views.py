@@ -1,11 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 
-from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate
-from .models import Question, Answer
+from .forms import UserForm, LoginUserForm, QuestionCreate, CommentCreate
+from .models import Question, Comment
 
 
 def user_registation(request):
@@ -73,32 +72,47 @@ def ask_a_guestion(request):
     return render(request, 'backends/create_post.html', locals())
 
 
-@login_required
+# @login_required
 def view_question(request, question_id):
     question = Question.objects.get(pk=question_id)
 
     if request.method == "POST":
-        form_answer = AnswerCreate(request.POST)
-        if form_answer.is_valid():
-            answer = form_answer.save(commit=False)
-            answer.author = request.user
-            answer.question_id = question.pk
-            answer.save()
+        form_comment = CommentCreate(request.POST)
+        if form_comment.is_valid():
+            reply_obj = None
+            try:
+                reply_id = int(request.POST.get('reply_id'))
+            except:
+                reply_id = None
+            if reply_id:
+                reply_obj = Comment.objects.get(id=reply_id)
+
+            #author = form_comment.cleaned_data['author']
+            content = form_comment.cleaned_data['content']
+            if reply_obj:
+                Comment(author=request.user, content=content, reply=reply_obj, question=question).save()
+            else:
+                Comment(author=request.user, content=content, question=question).save()
+                    # reply_comment = form_comment.save(commit=False)
+                    # reply_comment.reply = reply_obj
+                    # reply_comment.reply_id = int(request.POST.get("reply"))
+
+            # if request.POST.get("reply", None):
+            #     form_comment.reply_id = int(request.POST.get("reply"))
+
+            # answer = form_comment.save(commit=False)
+            # answer.author = request.user
+            # answer.question_id = question.pk
+            # answer.save()
             return redirect('/')
     else:
-        form_answer = AnswerCreate()
+        form_comment = CommentCreate()
 
-    try:
-        answer = Answer.objects.all().filter(question_id=question.pk)
-        context = {
-            'answer': answer,
-            'question': question,
-            'form_answer': form_answer
-        }
-        return render(request, 'backends/view_thread.html', context=context)
-    except ObjectDoesNotExist:
-        context = {
-            'question': question,
-            'form_answer': form_answer
-        }
-        return render(request, 'backends/view_thread.html', context=context)
+    comment = Comment.objects.all().filter(question_id=question.pk)
+
+    context = {
+        'comment': comment,
+        'question': question,
+        'form_comment': form_comment,
+    }
+    return render(request, 'backends/view_thread.html', context=context)

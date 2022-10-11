@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.forms import TextInput
 
-from .models import Question, Answer, CommentToAnswer
+from .models import Question, Comment
 
 
 class UserForm(UserCreationForm):
@@ -85,14 +85,18 @@ class LoginUserForm(AuthenticationForm):
 
 
 class QuestionCreate(forms.ModelForm):
+    label = ("Title"),
     title = forms.CharField(
         widget=forms.TextInput(attrs={
+            'class': 'form-control',
             'type': 'text',
             'required': 'true',
         }))
 
+    label = ("Content"),
     content = forms.CharField(
         widget=forms.TextInput(attrs={
+            'class': 'form-control',
             'type': 'text',
             'required': 'true',
         }))
@@ -103,14 +107,16 @@ class QuestionCreate(forms.ModelForm):
         fields = ("title", "content",)
 
 
-class AnswerCreate(forms.ModelForm):
+class CommentCreate(forms.ModelForm):
+    label = ("Comment"),
     content = forms.CharField(
-        widget=forms.TextInput(attrs={
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
             'type': 'text',
             'required': 'true',
-        })),
+        }))
 
     class Meta:
-        model = Answer
+        model = Comment
         exclude = ["author", "created_at"]
         fields = ("content",)

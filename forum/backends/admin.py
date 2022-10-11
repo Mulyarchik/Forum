@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
-from .models import Question, Answer, CommentToAnswer
+from .models import Question
 
 # LOGIN - admin
 # PASSWORD - admin
@@ -56,11 +56,13 @@ class QuestionAdmin(admin.ModelAdmin):
     list_editable = ('title', 'author')
 
 
-class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'content', 'author', 'created_at')
-    list_editable = ('content', 'author')
+# class AnswerAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'content', 'author', 'created_at')
+#     list_editable = ('content', 'author')
+
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(Question, QuestionAdmin)
-admin.site.register(Answer, AnswerAdmin)
+# admin.site.register(Answer, AnswerAdmin)
+
