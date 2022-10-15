@@ -15,15 +15,17 @@
         </div>
     </div>
 
+
     {% if comment %}
     <h5>Answers:</h5>
-    {% for item_comment in comment %}
 
     {% for reply in item_comment.replies.all %}
         {{reply.author}}
         {{reply.created_at.date}}
         {{reply.content}}
     {% endfor %}
+
+    {% for item_comment in comment %}
     {% if not item_comment.reply_id %}
     <div class="card mt-4">
         <div class="card-body">
@@ -37,17 +39,20 @@
         </div>
     </div>
     {% endif %}
+
     {% if item_comment.reply_id %}
     <div class="card mt-1 ms-5">
         <div class="card-body">
             <p class="card-text">{{ item_comment.content }}</p>
             <hr>
             <p class="card-text"><small class="text-muted">{{ item_comment.author }} {{ item_comment.created_at }}</small>
+                <a class="text-decoration-none" data-bs-toggle="collapse" href="#collapseExample{{item_comment.id}}"
+                   role="button" aria-expanded="false" aria-controls="collapseExample">
+                    Reply </a>
             </p>
         </div>
     </div>
     {% endif %}
-
     <div class="collapse" id="collapseExample{{item_comment.id}}">
         <div class="item mt-4">
             <form action="." method="POST" id="formreply">
@@ -60,10 +65,9 @@
             </form>
         </div>
     </div>
-
-
     {% endfor %}
     {% endif %}
+
     <div class="item mt-4">
         <form action="." method="POST">
             {% csrf_token %}

@@ -23,11 +23,11 @@ class Question(models.Model):
 
 
 class Comment(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, verbose_name='question')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True)
     content = models.CharField(max_length=1000, verbose_name='Comment')
     created_at = models.DateField(auto_now_add=True, verbose_name='Asked')
-    reply = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='Replies')
+    reply = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
 
     class Meta:
         verbose_name = 'Comment'

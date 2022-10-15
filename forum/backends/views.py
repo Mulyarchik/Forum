@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.shortcuts import render, redirect
 
 from .forms import UserForm, LoginUserForm, QuestionCreate, CommentCreate
@@ -15,6 +16,7 @@ def user_registation(request):
         if user_form.is_valid():
             user = user_form.save(commit=False)
             user_form.save()
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, "Вы успешно зарегестрировались")
             return redirect('/')
         else:
@@ -97,22 +99,21 @@ def view_question(request, question_id):
                     # reply_comment.reply = reply_obj
                     # reply_comment.reply_id = int(request.POST.get("reply"))
 
-            # if request.POST.get("reply", None):
-            #     form_comment.reply_id = int(request.POST.get("reply"))
-
             # answer = form_comment.save(commit=False)
             # answer.author = request.user
             # answer.question_id = question.pk
             # answer.save()
-            return redirect('/')
+            return redirect(question.get_absolute_url())
     else:
         form_comment = CommentCreate()
 
     comment = Comment.objects.all().filter(question_id=question.pk)
+    #child_comment = Comment.annotate(total=Count('id'))
 
     context = {
         'comment': comment,
         'question': question,
         'form_comment': form_comment,
+       # 'child_comment': child_comment,
     }
     return render(request, 'backends/view_thread.html', context=context)
