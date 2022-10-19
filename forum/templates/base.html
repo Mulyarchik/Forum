@@ -22,11 +22,10 @@
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="#">About Us</a>
                 </li>
-                {% if request.user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="/create">Create Post</a>
                 </li>
-                {% endif %}
+
             </ul>
             <div class="flex-grow-1 d-flex">
                 <form class="d-flex mx-lg-auto" role="search" id="search" align="center">
@@ -37,7 +36,7 @@
             {% if request.user.is_authenticated %}
             <div class="search" id="loginned">
                 <ul class="me-auto mb-lg-0">
-                    Добро пожаловать, {{ user.username }}
+                    <img src="{{ user.profile.image }}" width="32" height="30" alt="logo"> {{ user.username }}
                     <a class="btn btn-primary" href="/logout" role="button">LogOut</a>
                 </ul>
             </div>

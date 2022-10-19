@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.forms import TextInput
 
-from .models import Question, Comment
+from .models import Question, Comment, Answer
 
 
 class UserForm(UserCreationForm):
@@ -107,8 +107,36 @@ class QuestionCreate(forms.ModelForm):
         fields = ("title", "content",)
 
 
-class CommentCreate(forms.ModelForm):
+
+
+class AnswerCreate(forms.ModelForm):
+    pk = forms.IntegerField(),
+
     label = ("Comment"),
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'type': 'text',
+            'required': 'true',
+        }))
+
+    def clean_recipients(self):
+        #cleaned_data = super().clean()
+        #pk = cleaned_data.get("pk")
+        pk = self.cleaned_data['pk']
+        try:
+            User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return pk
+        raise forms.ValidationError("User Name has been taken!")
+
+    class Meta:
+        model = Answer
+        exclude = ["author", "created_at"]
+        fields = ("content",)
+
+class CommentCreate(forms.ModelForm):
+    label = ("Reply"),
     content = forms.CharField(
         widget=forms.Textarea(attrs={
             'class': 'form-control',
@@ -120,3 +148,4 @@ class CommentCreate(forms.ModelForm):
         model = Comment
         exclude = ["author", "created_at"]
         fields = ("content",)
+

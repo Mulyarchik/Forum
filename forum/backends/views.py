@@ -1,11 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 
-from .forms import UserForm, LoginUserForm, QuestionCreate, CommentCreate
-from .models import Question, Comment
+from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate
+from .models import Question, Comment, Profile, Answer
 
 
 def user_registation(request):
@@ -42,7 +41,11 @@ def user_login(request):
             return redirect('/')
     else:
         form = LoginUserForm()
-    return render(request, 'backends/login.html', {'form': form})
+
+    context = {
+        'form': form
+    }
+    return render(request, 'backends/login.html', context=context)
 
 
 def user_logout(request):
@@ -53,15 +56,21 @@ def user_logout(request):
 # !!!! id title username created_at
 def backends(request):
     questions = Question.objects.all()
+    profile = Profile.objects.all()
     context = {
         'thread': questions,
-        'title': 'список новостей'
+        'profile': profile
     }
     return render(request, 'backends/backends.html', context=context)
 
 
-@login_required
+# @login_required
 def ask_a_guestion(request):
+    if not request.user.is_authenticated:
+        error = ''
+        messages.error(request, "Для создания вопроса вам необходимо авторизоваться")
+        return redirect("/login")
+
     if request.method == "POST":
         form = QuestionCreate(request.POST)
         if form.is_valid():
@@ -77,43 +86,41 @@ def ask_a_guestion(request):
 # @login_required
 def view_question(request, question_id):
     question = Question.objects.get(pk=question_id)
+    answer = Answer.objects.all().filter(question_id=question.pk)
 
     if request.method == "POST":
-        form_comment = CommentCreate(request.POST)
-        if form_comment.is_valid():
-            reply_obj = None
-            try:
-                reply_id = int(request.POST.get('reply_id'))
-            except:
-                reply_id = None
-            if reply_id:
-                reply_obj = Comment.objects.get(id=reply_id)
-
-            #author = form_comment.cleaned_data['author']
-            content = form_comment.cleaned_data['content']
-            if reply_obj:
-                Comment(author=request.user, content=content, reply=reply_obj, question=question).save()
-            else:
-                Comment(author=request.user, content=content, question=question).save()
-                    # reply_comment = form_comment.save(commit=False)
-                    # reply_comment.reply = reply_obj
-                    # reply_comment.reply_id = int(request.POST.get("reply"))
-
-            # answer = form_comment.save(commit=False)
-            # answer.author = request.user
-            # answer.question_id = question.pk
-            # answer.save()
-            return redirect(question.get_absolute_url())
+        if request.POST.get("reply_to"):
+            form = CommentCreate(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.question_id = question.pk
+                comment.reply_to = answer.get(pk=request.POST.get("reply_to"))
+                comment.author = request.user
+                comment.save()
+                return redirect(question.get_absolute_url())
+        else:
+            form = AnswerCreate(request.POST)
+            if form.is_valid():
+                answer_form = form.save(commit=False)
+                answer_form.question_id = question.pk
+                answer_form.author = request.user
+                form.save()
+                return redirect(question.get_absolute_url())
     else:
-        form_comment = CommentCreate()
-
-    comment = Comment.objects.all().filter(question_id=question.pk)
-    #child_comment = Comment.annotate(total=Count('id'))
+        form = AnswerCreate()
 
     context = {
-        'comment': comment,
+        'answer': answer,
         'question': question,
-        'form_comment': form_comment,
-       # 'child_comment': child_comment,
+        'form': form,
     }
     return render(request, 'backends/view_thread.html', context=context)
+
+def view_profile(request, user_id):
+    user = User.objects.get(pk=user_id)
+    profile = Profile.objects.get(user_id=user_id)
+    context = {
+        'user': user,
+        'profile': profile
+    }
+    return render(request, 'backends/view_profile.html', context=context)
