@@ -10,51 +10,63 @@
             <p class="card-text">{{ question.title }}</p>
             <hr>
             <footer>
-                <p class="card-text"><small class="text-muted">{{ question.author }} {{ question.created_at}}</small></p>
+                <p class="card-text"><small class="text-muted">{{ question.author }} {{ question.created_at}}</small>
+                </p>
             </footer>
         </div>
     </div>
 
 
     <h5>Answers:</h5>
-    {% if answer %}
     {% for item_answer in answer %}
     <div class="card mt-4">
         <div class="card-body">
             <p class="card-text">{{ item_answer.content }}</p>
             <hr>
-            <p class="card-text"><small class="text-muted">{{ item_answer.author }} {{ item_answer.created_at }}</small>
-                <a href="#formreply" onclick="formReply( '{{ item_answer.author }}', '{{ item_answer.id }}' )">Reply</a>
+            <p class="card-text">
+                <small class="text-muted">
+                    <img src="{{ item_answer.author.image }}" width="30" height="30" alt="logo">
+                    {{ item_answer.author.username }} {{ item_answer.created_at }}
+                </small>
+                <a href="#formreply" onclick="formReply( '{{ item_answer.author.username }}', '{{ item_answer.id }}' )">Reply</a>
             </p>
         </div>
     </div>
-    {% endfor %}
-    {% if item_comment.reply_to %}
+
+
+    {% for item_comment in comment %}
+    {% if item_comment.answer_id == item_answer.id %}
     <div class="card mt-1 ms-5">
         <div class="card-body">
-            <p class="card-text">{{ item_answer.content }}</p>
+            <p class="card-text">{{ item_comment.content }}</p>
             <hr>
-            <p class="card-text"><small class="text-muted">{{ item_answer.author }} {{ item_answer.created_at }}</small>
-                <a href="#formreply" onclick="formReply('{{ item_answer.id }}', '{{ item_answer.author }}' )">Reply</a>
+            <p class="card-text">
+                <small class="text-muted">
+                    <img src="{{ item_comment.author.image }}" width="30" height="30" alt="logo">
+                    {{ item_comment.author.username }} {{ item_comment.created_at }}
+                </small>
+                <a href="#formreply"
+                   onclick="formReply('{{ item_comment.author.username }}', '{{ item_comment.answer_id }}')">Reply</a>
             </p>
         </div>
     </div>
     {% endif %}
+    {% endfor %}
 
-    {% endif %}
-        <div class="item mt-4">
-            <form action="." method="POST" id="formreply">
-                {% csrf_token %}
-                <input type="hidden" name="reply_to" id="id_reply_form" value="">
+    {% endfor %}
+    <div class="item mt-4">
+        <form action="." method="POST" id="formreply">
+            {% csrf_token %}
+            <input type="hidden" name="reply_to" id="id_reply_form" value="">
 
-                <label for="content_comment" class="form-control">Текст комментария</label>
-                <textarea class="form-control" id="content_comment" name="content" required=""></textarea>
-                <button type="submit" class="btn btn-primary col-md-4">Comment</button>
-            </form>
-        </div>
+            <label for="content_comment" class="form-control">Текст комментария</label>
+            <textarea class="form-control" id="content_comment" name="content" required=""></textarea>
+            <button type="submit" class="btn btn-primary col-md-4">Comment</button>
+        </form>
+    </div>
 </div>
 <script>
-    function formReply(name, id){
+    function formReply(name, id) {
         document.getElementById("id_reply_form").value = id;
         document.getElementById("content_comment").innerText = `${name}, `
     }

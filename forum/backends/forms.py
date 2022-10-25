@@ -1,19 +1,23 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
 from django.forms import TextInput
 
 from .models import Question, Comment, Answer
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 class UserForm(UserCreationForm):
     email = forms.EmailField(required=True, label='Email')
     first_name = forms.CharField(required=True, label='First Name')
     last_name = forms.CharField(required=True, label='Last Name')
+    #image = forms.ImageField(required=True, label='Image')
 
     class Meta:
         model = User
         fields = ("first_name", "last_name", "username", "email", "password1", "password2")
+
 
     first_name = forms.CharField(
         label=("Name"),
@@ -85,17 +89,19 @@ class LoginUserForm(AuthenticationForm):
 
 
 class QuestionCreate(forms.ModelForm):
-    label = ("Title"),
+
     title = forms.CharField(
+        label=("Title"),
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'type': 'text',
             'required': 'true',
         }))
 
-    label = ("Content"),
+
     content = forms.CharField(
-        widget=forms.TextInput(attrs={
+        label=("Describe your problem in detail"),
+        widget=forms.Textarea(attrs={
             'class': 'form-control',
             'type': 'text',
             'required': 'true',
@@ -120,15 +126,15 @@ class AnswerCreate(forms.ModelForm):
             'required': 'true',
         }))
 
-    def clean_recipients(self):
-        #cleaned_data = super().clean()
-        #pk = cleaned_data.get("pk")
-        pk = self.cleaned_data['pk']
-        try:
-            User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            return pk
-        raise forms.ValidationError("User Name has been taken!")
+    # def clean_recipients(self):
+    #     #cleaned_data = super().clean()
+    #     #pk = cleaned_data.get("pk")
+    #     pk = self.cleaned_data['pk']
+    #     try:
+    #         User.objects.get(pk=pk)
+    #     except User.DoesNotExist:
+    #         return pk
+    #     raise forms.ValidationError("User Name has been taken!")
 
     class Meta:
         model = Answer

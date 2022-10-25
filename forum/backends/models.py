@@ -1,8 +1,6 @@
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.contrib.auth.models import AbstractUser
 
 
 class Question(models.Model):
@@ -15,14 +13,13 @@ class Question(models.Model):
     def get_absolute_url(self):
         return "/thread/%i/" % self.id
 
-
-
     def __str__(self):
         return self.title
 
     class Meta:
         verbose_name = 'Question'
         verbose_name_plural = 'Questions'
+        ordering = ['-created_at']
 
 
 class Answer(models.Model):
@@ -38,15 +35,10 @@ class Answer(models.Model):
     def __str__(self):
         return self.content
 
-    # def get_comment(self):
-    #     return self.comment_set.filter(reply__isnull=True)
-
-
 
 class Comment(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, verbose_name='question')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True)
-    reply_to = models.ForeignKey(Answer, on_delete=models.CASCADE, blank=True, null=True, related_name='replies')
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, blank=True, null=True, related_name='replies')
     content = models.CharField(max_length=1000, verbose_name='Comment')
     created_at = models.DateField(auto_now_add=True, verbose_name='Asked')
 
@@ -60,15 +52,18 @@ class Comment(models.Model):
 
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='profile_picture', default='/media/profile_picture/defolt_user1.png')
+# class Profile(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+#     image = models.ImageField(upload_to='profile_picture', default='/media/profile_picture/defolt_user1.png')
+#
+#     @receiver(post_save, sender=User)
+#     def create_user_profile(sender, instance, created, **kwargs):
+#         if created:
+#             Profile.objects.create(user=instance)
+#
+#     @receiver(post_save, sender=User)
+#     def save_user_profile(sender, instance, **kwargs):
+#         instance.profile.save()
 
-    @receiver(post_save, sender=User)
-    def create_user_profile(sender, instance, created, **kwargs):
-        if created:
-            Profile.objects.create(user=instance)
-
-    @receiver(post_save, sender=User)
-    def save_user_profile(sender, instance, **kwargs):
-        instance.profile.save()
+class User(AbstractUser):
+    image = models.ImageField(upload_to='profile_picture', default='/media/profile_picture/defolt_user1.png', )

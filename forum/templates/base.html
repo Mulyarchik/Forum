@@ -27,17 +27,20 @@
                 </li>
 
             </ul>
-            <div class="flex-grow-1 d-flex">
-                <form class="d-flex mx-lg-auto" role="search" id="search" align="center">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
-            </div>
+
             {% if request.user.is_authenticated %}
             <div class="search" id="loginned">
                 <ul class="me-auto mb-lg-0">
-                    <img src="{{ user.profile.image }}" width="32" height="30" alt="logo"> {{ user.username }}
-                    <a class="btn btn-primary" href="/logout" role="button">LogOut</a>
+                    <img src="{{ user.image }}" width="30" height="30" alt="logo">&nbsp;{{ user.username }}&ensp;
+                    <div class="btn-group">
+                        <a href="#menu" data-bs-toggle="dropdown"><img src="/media/menu.png" width="30" height="30" alt="logo">  </a>
+                        <ul class="dropdown-menu dropdown-menu-lg-end">
+                            <li><a class="btn btn-link" href="{% url 'vlads_app:profile' user.id %}" role="button"
+                                   style="text-decoration: none;">Профиль</a></li>
+                            <li><a class="btn btn-link" href="/logout" role="button" style="text-decoration: none;">Выйти</a>
+                            </li>
+                        </ul>
+                    </div>
                 </ul>
             </div>
             {% else %}

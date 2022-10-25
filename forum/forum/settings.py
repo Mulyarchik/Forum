@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
 ]
 
+AUTH_USER_MODEL = 'backends.User'
+
 #AUTH_USER_MODEL = 'backends.My_User'
 
 MIDDLEWARE = [
@@ -147,6 +149,7 @@ DJOSER = {
     "USER_ID_FIELD": "username",
     "LOGIN_FIELD": "email"
 }
+
 
 
 MEDIA_URL = '/media/'

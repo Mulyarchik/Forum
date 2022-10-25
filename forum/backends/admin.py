@@ -9,8 +9,8 @@ from .models import Question
 # LOGIN - admin
 # PASSWORD - admin
 # Email - admin@admin.admin
-# admin.site.unregister(User)
-# admin.site.register(User, UserAdmin)
+#admin.site.unregister(User)
+#admin.site.register(User, UserAdmin)
 
 User._meta.get_field('email')._unique = True
 User._meta.get_field('email').blank = False
@@ -58,7 +58,9 @@ class QuestionAdmin(admin.ModelAdmin):
 #     list_editable = ('content', 'author')
 
 
-admin.site.unregister(User)
+
+
+#admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(Question, QuestionAdmin)
 # admin.site.register(Answer, AnswerAdmin)
