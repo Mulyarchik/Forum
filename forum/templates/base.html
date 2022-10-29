@@ -20,10 +20,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">About Us</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/create">Create Post</a>
+                    <a class="nav-link active" aria-current="page" href="/questions/create">Create Post</a>
                 </li>
 
             </ul>
@@ -31,7 +28,13 @@
             {% if request.user.is_authenticated %}
             <div class="search" id="loginned">
                 <ul class="me-auto mb-lg-0">
-                    <img src="{{ user.image }}" width="30" height="30" alt="logo">&nbsp;{{ user.username }}&ensp;
+                    {% if item.author.image %}
+                        <img src="{{ item.author.image.url }}" width="30" height="30">&nbsp;
+                    {% else %}
+                        {% load static %}
+                        <img src="{% static 'prof_pict/img.png' %}" width="30" height="30" alt="logo">&nbsp;
+                    {% endif %}
+                    &nbsp;{{ user.username }}&ensp;
                     <div class="btn-group">
                         <a href="#menu" data-bs-toggle="dropdown"><img src="/media/menu.png" width="30" height="30" alt="logo">  </a>
                         <ul class="dropdown-menu dropdown-menu-lg-end">

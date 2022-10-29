@@ -1,8 +1,8 @@
+
 {% extends "base.html" %}
 {% block title %}
 NickForum - Way to the dream
 {% endblock %}
-
 
 {% block content %}
 {% for item in thread %}
@@ -11,9 +11,20 @@ NickForum - Way to the dream
         <a class="item" href="{{ item.get_absolute_url }}" style="text-decoration: none;">
             <div class="card-body">
                 <p class="card-text">{{ item.title }}</p>
-                    <a class="item" href="{% url 'vlads_app:profile' item.author.id %}">
-                        <p class="card-text"><small class="text-muted">{{ item.author.username }}</small></a>
-                <small>{{ item.created_at }}</small></p>
+                <div class="mt-3    ">
+                    <a class="item" href="{% url 'vlads_app:profile' item.author.id %}" style="text-decoration: none;">
+                        <p class="card-text"><small class="text-muted">
+                            {% if item.author.image %}
+                            <img src="{{ item.author.image.url }}" width="30" height="30">
+                            {% else %}
+                            {% load static %}
+                            <img src="{% static 'prof_pict/img.png' %}" width="30" height="30" alt="logo">
+                            {% endif %}
+                            &nbsp;{{ item.author.username }}&ensp;</small>
+                    </a>
+                    <small>{{ item.created_at }}</small>
+                    </p>
+                </div>
             </div>
         </a>
     </div>

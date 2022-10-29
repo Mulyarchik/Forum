@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
-# from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate
 from .models import Question, Comment, Answer, User
@@ -15,7 +14,7 @@ def user_registation(request):
         if user_form.is_valid():
             user = user_form.save(commit=False)
             user_form.save()
-            # login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, "Вы успешно зарегестрировались")
             return redirect('/')
         else:
@@ -38,7 +37,9 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('/')
+        else:
+            messages.error(request, "Форма не прошла валидацию!")
+        return redirect('/')
     else:
         form = LoginUserForm()
 
@@ -53,19 +54,12 @@ def user_logout(request):
     return redirect('/')
 
 
-# !!!! id title username created_at
 def backends(request):
-    questions = Question.objects.all()
-    # questions = Question.objects.select_related('author')
-    # profile = Profile.objects.all()
-    context = {
-        'thread': questions,
-        #    'profile': profile
-    }
-    return render(request, 'backends/backends.html', context=context)
+    question = Question.objects.select_related('author').order_by('-created_at')
+
+    return render(request, 'backends/backends.html', {'thread': question})
 
 
-# @login_required
 def ask_a_guestion(request):
     if not request.user.is_authenticated:
         error = ''
@@ -74,24 +68,51 @@ def ask_a_guestion(request):
 
     if request.method == "POST":
         form = QuestionCreate(request.POST)
+        print("СОЗДАНИЕ ПОСТ")
         if form.is_valid():
             question = form.save(commit=False)
             question.author = request.user
             question.save()
-            return redirect('/')
+        else:
+            messages.error(request, "Форма не прошла валидацию!")
+        return redirect('/')
     else:
         form = QuestionCreate()
     return render(request, 'backends/create_post.html', locals())
+
+
+def update_question(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+
+    if request.method == 'GET':
+        print("РЕДАКТИРОВАНИЕ ГЕТ")
+        if request.user != question.author:
+            messages.error(request, "У вас нету прав для редактирования записи!")
+            return redirect(question.get_absolute_url())
+        form = QuestionCreate(instance=question)
+
+    if request.method == 'POST':
+        print("РЕДАКТИРОВАНИЕ ПОСТ")
+        form = QuestionCreate(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+        else:
+            messages.error(request, "Форма не прошла валидацию!")
+        return redirect(question.get_absolute_url())
+
+    context = {
+        'form': form,
+        'question': question
+    }
+    return render(request, 'backends/create_post.html', context)
 
 
 # @login_required
 def view_question(request, question_id):
     question = Question.objects.select_related('author').get(pk=question_id)
     answer = Answer.objects.select_related('author').all().filter(question_id=question.pk)
-
     if request.method == "POST":
         if not request.user.is_authenticated:
-            error = ''
             messages.error(request, "Для создания вопроса вам необходимо авторизоваться")
             return redirect(question.get_absolute_url())
 
@@ -102,7 +123,9 @@ def view_question(request, question_id):
                 comment.answer = answer.get(pk=request.POST.get("reply_to"))
                 comment.author = request.user
                 comment.save()
-                return redirect(question.get_absolute_url())
+            else:
+                messages.error(request, "Форма не прошла валидацию!")
+            return redirect(question.get_absolute_url())
         else:
             form = AnswerCreate(request.POST)
             if form.is_valid():
@@ -110,11 +133,12 @@ def view_question(request, question_id):
                 answer_form.question_id = question.pk
                 answer_form.author = request.user
                 form.save()
-                return redirect(question.get_absolute_url())
+            else:
+                messages.error(request, "Форма не прошла валидацию!")
+            return redirect(question.get_absolute_url())
     else:
         form = AnswerCreate()
 
-    # comment = Comment.objects.all().filter(question_id=question_id)
     comment = Comment.objects.select_related('author')
 
     context = {
@@ -124,6 +148,36 @@ def view_question(request, question_id):
         'comment': comment,
     }
     return render(request, 'backends/view_thread.html', context=context)
+
+
+#def update_comment(request, answer_id, question_id):
+
+#def update_comment(request, question_id, answer_id, comment_id):
+def update_comment(request, question_id, answer_id, comment_id):
+    question = get_object_or_404(Question, pk=question_id)
+
+    if comment_id == 0:
+        answer = get_object_or_404(Answer, pk=answer_id)
+
+    elif comment_id != 0:
+        answer = get_object_or_404(Comment, pk=comment_id)
+
+
+    if request.method == 'GET':
+        if request.user != answer.author:
+            messages.error(request, "У вас нету прав для редактирования записи!")
+            return redirect(question.get_absolute_url())
+        form = CommentCreate(instance=answer)
+
+    if request.method == 'POST':
+        form = CommentCreate(request.POST, instance=answer)
+        if form.is_valid():
+            form.save()
+        else:
+            messages.error(request, "Форма не прошла валидацию!")
+        return redirect(question.get_absolute_url())
+
+    return render(request, 'backends/update_comment.html', locals())
 
 
 def view_profile(request, user_id):

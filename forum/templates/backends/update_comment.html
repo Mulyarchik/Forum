@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}
+Update comment
+{% endblock %}
+
+{% block content %}
+<div class="container-sm">
+    <div class="mb-3">
+         <form method="post" action={% if post %} "{% url 'vlads_app:update_comment' comment_id=answer.id  %}"
+        {% endif %}>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary col-md-4">Update Comment</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -7,10 +7,24 @@
 <div class="container-xl">
     <div class="card mb-4 mt-4">
         <div class="card-body">
-            <p class="card-text">{{ question.title }}</p>
+
+            <p class="card-text"><h6>{{ question.title }}</h6></p>
+            {{ question.content }}
             <hr>
             <footer>
-                <p class="card-text"><small class="text-muted">{{ question.author }} {{ question.created_at}}</small>
+
+                <p class="card-text">
+                    {% if question.author.image %}
+                        <img src="{{ question.author.image.url }}" width="30" height="30">&nbsp;
+                    {% else %}
+                        {% load static %}
+                        <img src="{% static 'prof_pict/img.png' %}" width="30" height="30" alt="logo">&nbsp;
+                    {% endif %}
+                    <small class="text-muted">{{ question.author }} {{ question.created_at }}</small>
+                    {% if request.user == question.author %}
+                    <a class="btn btn-link" href="{% url 'vlads_app:post_update' question.id %}" role="button"
+                                   style="text-decoration: none;">Update Post</a>
+                    {% endif %}
                 </p>
             </footer>
         </div>
@@ -25,10 +39,21 @@
             <hr>
             <p class="card-text">
                 <small class="text-muted">
-                    <img src="{{ item_answer.author.image }}" width="30" height="30" alt="logo">
-                    {{ item_answer.author.username }} {{ item_answer.created_at }}
+                    {% if item_answer.author.image %}
+                        <img src="{{ item_answer.author.image.url }}" width="30" height="30">&nbsp;
+                    {% else %}
+                        {% load static %}
+                        <img src="{% static 'prof_pict/img.png' %}" width="30" height="30" alt="logo">&nbsp;
+                    {% endif %}
+                    {{ item_answer.author.username }}
+                    {{ item_answer.created_at }}
                 </small>
-                <a href="#formreply" onclick="formReply( '{{ item_answer.author.username }}', '{{ item_answer.id }}' )">Reply</a>
+                {% if request.user != item_answer.author %}
+                <a href="#formreply" style="text-decoration: none;" onclick="formReply( '{{ item_answer.author.username }}', '{{ item_answer.id }}' )">Reply</a>
+                {% else %}
+                    <a href="{% url 'vlads_app:update_comment' question.id item_answer.id 0 %}" role="button"
+                                   style="text-decoration: none;">&nbsp;&nbsp;Update Comment</a>
+                {% endif %}
             </p>
         </div>
     </div>
@@ -42,11 +67,21 @@
             <hr>
             <p class="card-text">
                 <small class="text-muted">
-                    <img src="{{ item_comment.author.image }}" width="30" height="30" alt="logo">
+                    {% if item_comment.author.image %}
+                        <img src="{{ item_comment.author.image.url }}" width="30" height="30">&nbsp;
+                    {% else %}
+                        {% load static %}
+                        <img src="{% static 'prof_pict/img.png' %}" width="30" height="30" alt="logo">&nbsp;
+                    {% endif %}
                     {{ item_comment.author.username }} {{ item_comment.created_at }}
                 </small>
+                {% if request.user != item_comment.author %}
                 <a href="#formreply"
                    onclick="formReply('{{ item_comment.author.username }}', '{{ item_comment.answer_id }}')">Reply</a>
+                {% else %}
+                    <a href="{% url 'vlads_app:update_comment' question.id item_comment.answer_id item_comment.id  %}" role="button"
+                                   style="text-decoration: none;">&nbsp;&nbsp;Update Comment</a>
+                {% endif %}
             </p>
         </div>
     </div>

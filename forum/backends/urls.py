@@ -10,8 +10,11 @@ urlpatterns = [
     path('register/', user_registation, name='register'),
     path('login/', user_login, name='login'),
     path('logout/', user_logout, name='logout'),
-    path('create/', ask_a_guestion, name='ask_a_guestion'),
-    path('thread/<int:question_id>/', view_question, name='post'),
+    path('questions/create/', ask_a_guestion, name='ask_a_guestion'),
+    path('questions/<int:question_id>/', view_question, name='post'),
+    path('questions/<int:question_id>/edit', update_question, name='post_update'),
+    path('questions/<int:question_id>/answers/<int:answer_id>/comments/<int:comment_id>', update_comment, name='update_comment'),
     path('profile/<int:user_id>/', view_profile, name='profile')
 
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)\
+              + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

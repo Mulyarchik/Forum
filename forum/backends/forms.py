@@ -1,10 +1,12 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-#from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.forms import TextInput
 
 from .models import Question, Comment, Answer
-from django.contrib.auth import get_user_model
+from django.conf.global_settings import DATETIME_INPUT_FORMATS
+
 User = get_user_model()
 
 
@@ -12,12 +14,12 @@ class UserForm(UserCreationForm):
     email = forms.EmailField(required=True, label='Email')
     first_name = forms.CharField(required=True, label='First Name')
     last_name = forms.CharField(required=True, label='Last Name')
-    #image = forms.ImageField(required=True, label='Image')
+
+    # image = forms.ImageField(required=True, label='Image')
 
     class Meta:
         model = User
         fields = ("first_name", "last_name", "username", "email", "password1", "password2")
-
 
     first_name = forms.CharField(
         label=("Name"),
@@ -98,7 +100,6 @@ class QuestionCreate(forms.ModelForm):
             'required': 'true',
         }))
 
-
     content = forms.CharField(
         label=("Describe your problem in detail"),
         widget=forms.Textarea(attrs={
@@ -111,8 +112,6 @@ class QuestionCreate(forms.ModelForm):
         model = Question
         exclude = ["author", "created_at"]
         fields = ("title", "content",)
-
-
 
 
 class AnswerCreate(forms.ModelForm):
@@ -141,6 +140,7 @@ class AnswerCreate(forms.ModelForm):
         exclude = ["author", "created_at"]
         fields = ("content",)
 
+
 class CommentCreate(forms.ModelForm):
     label = ("Reply"),
     content = forms.CharField(
@@ -154,4 +154,3 @@ class CommentCreate(forms.ModelForm):
         model = Comment
         exclude = ["author", "created_at"]
         fields = ("content",)
-
