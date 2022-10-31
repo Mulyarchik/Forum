@@ -49,5 +49,8 @@ class Comment(models.Model):
         return self.content
 
 
+def user_directory_path(instance, filename):
+    return 'profile_picture/user_{0}/{1}'.format(instance.id, filename)
+
 class User(AbstractUser):
-    image = models.ImageField(upload_to='profile_picture/', blank=True, null=True)
+    image = models.ImageField(upload_to=user_directory_path, blank=True, null=True)

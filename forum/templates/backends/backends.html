@@ -1,5 +1,4 @@
-
-{% extends "base.html" %}
+{% extends "backends/base.html" %}
 {% block title %}
 NickForum - Way to the dream
 {% endblock %}
@@ -8,25 +7,25 @@ NickForum - Way to the dream
 {% for item in thread %}
 <div class="container-xl">
     <div class="card mb-3 mt-4">
-        <a class="item" href="{{ item.get_absolute_url }}" style="text-decoration: none;">
-            <div class="card-body">
+        <div class="card-body">
+            <a href="{{ item.get_absolute_url }}" style="text-decoration: none;">
                 <p class="card-text">{{ item.title }}</p>
-                <div class="mt-3    ">
-                    <a class="item" href="{% url 'vlads_app:profile' item.author.id %}" style="text-decoration: none;">
+                <div class="mt-3">
+                    <a href="{% url 'vlads_app:profile' item.author.id %}" style="text-decoration: none;">
                         <p class="card-text"><small class="text-muted">
                             {% if item.author.image %}
                             <img src="{{ item.author.image.url }}" width="30" height="30">
                             {% else %}
                             {% load static %}
-                            <img src="{% static 'prof_pict/img.png' %}" width="30" height="30" alt="logo">
+                            <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30" height="30" alt="logo">
                             {% endif %}
                             &nbsp;{{ item.author.username }}&ensp;</small>
                     </a>
-                    <small>{{ item.created_at }}</small>
-                    </p>
+                            <small>{{ item.created_at|date:"M. d. Y H:i" }}</small>
+                        </p>
                 </div>
-            </div>
-        </a>
+            </a>
+        </div>
     </div>
 </div>
 {% endfor %}

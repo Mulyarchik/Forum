@@ -19,15 +19,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = 'django-insecure-9mq!v9xw9xz8t(sxd-3)(19ag+i@w07&!&g&kz5-a_!wej(9we'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,8 +38,6 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = 'backends.User'
-
-# AUTH_USER_MODEL = 'backends.My_User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -80,9 +75,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'forum_start.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -93,9 +85,6 @@ DATABASES = {
         'PORT': '5432'
     }
 }
-
-# Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -120,48 +109,21 @@ AUTHENTICATION_BACKENDS = ('backends.backends.AuthBackends',
 
 LANGUAGE_CODE = 'en-US'
 
-DATETIME_INPUT_FORMATS = ['%m/%d/%Y %H:%M']
-DATE_INPUT_FORMATS = ['%m/%d/%Y %H:%M']
-# USE_I18N = True
-USE_L10N = False
-# USE_TZ = True
-
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = 'Europe/Minsk'
 
 USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-   os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, 'static/'),
 ]
 
-
-# STATIC_URL = '/static/'
-#
-# STATICFILES_DIRS = [
-#     #BASE_DIR / "static",
-#     #'forum_start/forum_start/static/',
-#     os.path.join(BASE_DIR, "static"),
-# ]
-#
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static', 'static_root')
-
-
-
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, 'static', 'static_files'),
-# )
-
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static', 'static_root')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

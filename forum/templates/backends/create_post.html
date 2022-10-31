@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "backends/base.html" %}
 
 {% block title %}
 Create post
@@ -7,15 +7,12 @@ Create post
 {% block content %}
 <div class="container-sm">
     <div class="mb-3">
-         <form method="post" action={% if post %} "{% url 'vlads_app:post_update' question_id=question.id  %}"
+        <form method="post" action={% if post %}
+        "{% url 'vlads_app:post_update' question_id=question.id %}"
         {% endif %}>
-            {% csrf_token %}
-            {{ form.as_p }}
-            {% if action == post %}
-                <button type="submit" class="btn btn-primary col-md-4">Update Post</button>
-            {% else %}
-                <button type="submit" class="btn btn-primary col-md-4">Create Post</button>
-            {% endif %}
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary col-md-4">Create / Update Post</button>
         </form>
 
     </div>

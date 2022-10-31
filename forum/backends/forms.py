@@ -154,3 +154,16 @@ class CommentCreate(forms.ModelForm):
         model = Comment
         exclude = ["author", "created_at"]
         fields = ("content",)
+
+class UserPhotoUpdate(forms.ModelForm):
+    image = forms.ImageField(
+        label=(""),
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'type': 'file'
+        }))
+
+    class Meta:
+        model = User
+        #exclude = ["author", "created_at"]
+        fields = ("image",)

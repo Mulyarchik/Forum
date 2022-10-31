@@ -13,7 +13,10 @@ urlpatterns = [
     path('questions/create/', ask_a_guestion, name='ask_a_guestion'),
     path('questions/<int:question_id>/', view_question, name='post'),
     path('questions/<int:question_id>/edit', update_question, name='post_update'),
+    path('questions/<int:question_id>/delete', delete_question, name='delete_question'),
     path('questions/<int:question_id>/answers/<int:answer_id>/comments/<int:comment_id>', update_comment, name='update_comment'),
+    path('questions/<int:question_id>/answers/<int:answer_id>/delete', delete_answer, name='delete_answer'),
+    path('questions/<int:question_id>/answers/<int:answer_id>/comments/<int:comment_id>/delete', delete_comment, name='delete_comment'),
     path('profile/<int:user_id>/', view_profile, name='profile')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)\

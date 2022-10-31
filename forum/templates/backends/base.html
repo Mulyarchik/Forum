@@ -28,15 +28,16 @@
             {% if request.user.is_authenticated %}
             <div class="search" id="loginned">
                 <ul class="me-auto mb-lg-0">
-                    {% if item.author.image %}
-                        <img src="{{ item.author.image.url }}" width="30" height="30">&nbsp;
+                    {% if user.image %}
+                    <img src="{{ user.image.url }}" width="30" height="30">&nbsp;
                     {% else %}
-                        {% load static %}
-                        <img src="{% static 'prof_pict/img.png' %}" width="30" height="30" alt="logo">&nbsp;
+                    {% load static %}
+                    <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30" height="30" alt="logo">&nbsp;
                     {% endif %}
                     &nbsp;{{ user.username }}&ensp;
                     <div class="btn-group">
-                        <a href="#menu" data-bs-toggle="dropdown"><img src="/media/menu.png" width="30" height="30" alt="logo">  </a>
+                        <a href="#menu" data-bs-toggle="dropdown"><img src="/media/menu.png" width="30" height="30"
+                                                                       alt="logo"> </a>
                         <ul class="dropdown-menu dropdown-menu-lg-end">
                             <li><a class="btn btn-link" href="{% url 'vlads_app:profile' user.id %}" role="button"
                                    style="text-decoration: none;">Профиль</a></li>

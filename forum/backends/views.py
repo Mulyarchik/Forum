@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate
+from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate, UserPhotoUpdate
 from .models import Question, Comment, Answer, User
 
 
@@ -150,9 +150,9 @@ def view_question(request, question_id):
     return render(request, 'backends/view_thread.html', context=context)
 
 
-#def update_comment(request, answer_id, question_id):
+# def update_comment(request, answer_id, question_id):
 
-#def update_comment(request, question_id, answer_id, comment_id):
+# def update_comment(request, question_id, answer_id, comment_id):
 def update_comment(request, question_id, answer_id, comment_id):
     question = get_object_or_404(Question, pk=question_id)
 
@@ -161,7 +161,6 @@ def update_comment(request, question_id, answer_id, comment_id):
 
     elif comment_id != 0:
         answer = get_object_or_404(Comment, pk=comment_id)
-
 
     if request.method == 'GET':
         if request.user != answer.author:
@@ -182,7 +181,39 @@ def update_comment(request, question_id, answer_id, comment_id):
 
 def view_profile(request, user_id):
     user = User.objects.get(pk=user_id)
+
+    if request.method == "POST":
+        form = UserPhotoUpdate(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Изображение пользователя успешно изменено!")
+        else:
+            messages.error(request, "Изображение пользователя не было изменено!")
+        return redirect('/')
+    else:
+        form = UserPhotoUpdate()
+
     context = {
         'user': user,
+        'form': form
+
     }
     return render(request, 'backends/view_profile.html', context=context)
+
+
+def delete_answer(request, question_id, answer_id):
+    question = Question.objects.get(pk=question_id)
+    Answer.objects.get(pk=answer_id).delete()
+    return redirect(question.get_absolute_url())
+
+
+# @user_passes_test(lambda u: u.is_staff)
+def delete_comment(request, question_id, answer_id, comment_id):
+    question = Question.objects.get(pk=question_id)
+    Comment.objects.get(pk=comment_id).delete()
+    return redirect(question.get_absolute_url())
+
+
+def delete_question(request, question_id):
+    Question.objects.get(pk=question_id).delete()
+    return redirect('/')

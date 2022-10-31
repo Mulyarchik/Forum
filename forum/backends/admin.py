@@ -62,8 +62,8 @@ class CommentAdmin(admin.ModelAdmin):
     list_editable = ('content', 'author')
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'image', )
-    list_editable = ('image',)
+    list_display = ('id', 'username', 'is_staff', 'image', )
+    list_editable = ('is_staff', 'image',)
 
 
 #admin.site.unregister(User)

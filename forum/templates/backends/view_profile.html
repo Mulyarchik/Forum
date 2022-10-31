@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "backends/base.html" %}
 {% block title %}
 Profile
 {% endblock %}
@@ -7,13 +7,26 @@ Profile
 {% block content %}
 <div class="container-xl">
     <div class="card mb-3 mt-4">
-            <div class="card-body">
-                <p class="card-text"><img src="{{ user.image }}" width="250" height="250"></p>
-                <p class="card-text">Name: {{ user.first_name }}</p>
-                <p class="card-text">Surname: {{ user.last_name }}</p>
-                <p class="card-text">Email: {{ user.email }}</p>
-                <p class="card-text">Joined us: {{ user.date_joined }}</p>
-            </div>
+        <div class="card-body">
+            {% if user.image %}
+            <img src="{{ user.image.url }}" width="250" height="250" alt="Profile Image">
+            {% else %}
+            {% load static %}
+            <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="250" height="250" alt="Profile Image">
+            {% endif %}
+
+            <p class="card-text">
+                <form enctype="multipart/form-data" method="post" action="">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary col-md-4">Update User Photo</button>
+                </form>
+            </p>
+            <p class="card-text">Name: {{ user.first_name }}</p>
+            <p class="card-text">Surname: {{ user.last_name }}</p>
+            <p class="card-text">Email: {{ user.email }}</p>
+            <p class="card-text">Joined us: {{ user.date_joined }}</p>
+        </div>
         </a>
     </div>
 </div>
