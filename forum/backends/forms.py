@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 # from django.contrib.auth.models import User
 from django.forms import TextInput
-
-from .models import Question, Comment, Answer
+from django_select2 import forms as s2forms
+from .models import Question, Comment, Answer, Tag
 from django.conf.global_settings import DATETIME_INPUT_FORMATS
 
 User = get_user_model()
@@ -90,7 +90,15 @@ class LoginUserForm(AuthenticationForm):
                                           }))
 
 
+# class TagWidget(s2forms.ModelSelect2Widget):
+#     search_fields = [
+#         "name__icontains",
+#     ]
+
+
 class QuestionCreate(forms.ModelForm):
+    # tag = forms.ModelMultipleChoiceField(queryset=Tag.objects.all(),
+    #                                      widget=forms.CheckboxSelectMultiple)
 
     title = forms.CharField(
         label=("Title"),
@@ -110,8 +118,11 @@ class QuestionCreate(forms.ModelForm):
 
     class Meta:
         model = Question
+        # widgets = {
+        #     'tag': TagWidget,
+        # }
         exclude = ["author", "created_at"]
-        fields = ("title", "content",)
+        fields = ("title", "content")
 
 
 class AnswerCreate(forms.ModelForm):

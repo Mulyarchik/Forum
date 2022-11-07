@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
-from .models import Question, Answer, Comment, User
+from .models import Tag, Question, Answer, Comment, User
 
 # LOGIN - admin
 # PASSWORD - admin
@@ -71,4 +71,5 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Comment, CommentAdmin)
+admin.site.register(Tag)
 

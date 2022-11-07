@@ -1,9 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate, UserPhotoUpdate
-from .models import Question, Comment, Answer, User
+from .models import Question, Comment, Answer, User, Tag
 
 
 def user_registation(request):
@@ -61,6 +62,7 @@ def backends(request):
 
 
 def ask_a_guestion(request):
+    tag = Tag.objects.all().order_by('-name')
     if not request.user.is_authenticated:
         error = ''
         messages.error(request, "Для создания вопроса вам необходимо авторизоваться")
@@ -68,11 +70,16 @@ def ask_a_guestion(request):
 
     if request.method == "POST":
         form = QuestionCreate(request.POST)
-        print("СОЗДАНИЕ ПОСТ")
         if form.is_valid():
+            print(request.POST)
             question = form.save(commit=False)
             question.author = request.user
             question.save()
+
+            list_of_tags = request.POST.getlist('tags')
+            for item_tag in list_of_tags:
+                tag = Tag.objects.get(pk=item_tag)
+                question.tag.add(tag)
         else:
             messages.error(request, "Форма не прошла валидацию!")
         return redirect('/')
@@ -83,37 +90,49 @@ def ask_a_guestion(request):
 
 def update_question(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
+    tag = Tag.objects.all()
+    # question = Question.objects.prefetch_related('tag').get(pk=question_id)
 
     if request.method == 'GET':
-        print("РЕДАКТИРОВАНИЕ ГЕТ")
+        print('РЕДАКТИРОВАНИЕ ГЕТ')
         if request.user != question.author:
             messages.error(request, "У вас нету прав для редактирования записи!")
             return redirect(question.get_absolute_url())
         form = QuestionCreate(instance=question)
 
     if request.method == 'POST':
-        print("РЕДАКТИРОВАНИЕ ПОСТ")
+        print('РЕДАКТИРОВАНИЕ ПОСТ')
         form = QuestionCreate(request.POST, instance=question)
         if form.is_valid():
             form.save()
+            for old_item in question.tag.all():
+                my_str = str(old_item)
+                res = my_str.split()[0]
+                Question.tag.through.objects.filter(question_id=question_id, tag_id=res).delete()
+
+            list_of_tags = request.POST.getlist('tags')
+            for item_tag in list_of_tags:
+                tag = Tag.objects.get(pk=item_tag)
+                question.tag.add(tag)
         else:
             messages.error(request, "Форма не прошла валидацию!")
         return redirect(question.get_absolute_url())
 
     context = {
         'form': form,
-        'question': question
+        'question': question,
+        'tag': tag
     }
     return render(request, 'backends/create_post.html', context)
 
 
-# @login_required
 def view_question(request, question_id):
     question = Question.objects.select_related('author').get(pk=question_id)
     answer = Answer.objects.select_related('author').all().filter(question_id=question.pk)
+
     if request.method == "POST":
         if not request.user.is_authenticated:
-            messages.error(request, "Для создания вопроса вам необходимо авторизоваться")
+            messages.error(request, "Для ответа вам необходимо авторизоваться")
             return redirect(question.get_absolute_url())
 
         if request.POST.get("reply_to"):
@@ -150,9 +169,6 @@ def view_question(request, question_id):
     return render(request, 'backends/view_thread.html', context=context)
 
 
-# def update_comment(request, answer_id, question_id):
-
-# def update_comment(request, question_id, answer_id, comment_id):
 def update_comment(request, question_id, answer_id, comment_id):
     question = get_object_or_404(Question, pk=question_id)
 
@@ -179,6 +195,7 @@ def update_comment(request, question_id, answer_id, comment_id):
     return render(request, 'backends/update_comment.html', locals())
 
 
+@login_required
 def view_profile(request, user_id):
     user = User.objects.get(pk=user_id)
 
@@ -195,7 +212,7 @@ def view_profile(request, user_id):
 
     context = {
         'user': user,
-        'form': form
+        'form': form,
 
     }
     return render(request, 'backends/view_profile.html', context=context)

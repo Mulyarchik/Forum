@@ -2,6 +2,10 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+class Tag(models.Model):
+    name = models.CharField(max_length=20, verbose_name='tag')
+    def __str__(self):
+        return '{0} ({1})'.format(self.id, self.name)
 
 class Question(models.Model):
     title = models.CharField(max_length=500, verbose_name='Article title')
@@ -9,6 +13,7 @@ class Question(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Asked')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Modified ')
+    tag = models.ManyToManyField(Tag, blank=True)
 
     def get_absolute_url(self):
         return "/questions/%i/" % self.id
@@ -25,6 +30,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, verbose_name='question')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True)
     content = models.CharField(max_length=1000, verbose_name='Comment')
+    is_useful = models.BooleanField(verbose_name='Is Useful', null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Asked')
 
     class Meta:
