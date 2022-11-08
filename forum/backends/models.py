@@ -14,6 +14,7 @@ class Question(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Asked')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Modified ')
     tag = models.ManyToManyField(Tag, blank=True)
+    #question = models.OneToOneField('Voting')
 
     def get_absolute_url(self):
         return "/questions/%i/" % self.id
@@ -32,10 +33,12 @@ class Answer(models.Model):
     content = models.CharField(max_length=1000, verbose_name='Comment')
     is_useful = models.BooleanField(verbose_name='Is Useful', null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Asked')
+    #answer = models.OneToOneField('Voting')
 
     class Meta:
         verbose_name = 'Answer'
         verbose_name_plural = 'Answers'
+        ordering = ['is_useful']
 
     def __str__(self):
         return self.content
@@ -60,3 +63,8 @@ def user_directory_path(instance, filename):
 
 class User(AbstractUser):
     image = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
+    voting = models.ManyToManyField('Vote')
+
+# class Voting(models.Model):
+#     result = models.IntegerField
+

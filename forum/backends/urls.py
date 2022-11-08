@@ -16,6 +16,7 @@ urlpatterns = [
     path('questions/<int:question_id>/delete', delete_question, name='delete_question'),
     path('questions/<int:question_id>/answers/<int:answer_id>/comments/<int:comment_id>', update_comment, name='update_comment'),
     path('questions/<int:question_id>/answers/<int:answer_id>/delete', delete_answer, name='delete_answer'),
+    path('questions/<int:question_id>/answers/<int:answer_id>/update_status', update_status_comment, name='update_status_comment'),
     path('questions/<int:question_id>/answers/<int:answer_id>/comments/<int:comment_id>/delete', delete_comment, name='delete_comment'),
     path('profile/<int:user_id>/', view_profile, name='profile')
 

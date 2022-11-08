@@ -194,6 +194,16 @@ def update_comment(request, question_id, answer_id, comment_id):
 
     return render(request, 'backends/update_comment.html', locals())
 
+def update_status_comment(request, question_id, answer_id):
+    question = Question.objects.get(pk=question_id)
+    answer = Answer.objects.get(pk=answer_id, question_id=question_id)
+    if answer.is_useful:
+        answer.is_useful = None
+        answer.save()
+    else:
+        answer.is_useful = True
+        answer.save()
+    return redirect(question.get_absolute_url())
 
 @login_required
 def view_profile(request, user_id):

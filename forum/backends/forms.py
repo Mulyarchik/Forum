@@ -97,9 +97,6 @@ class LoginUserForm(AuthenticationForm):
 
 
 class QuestionCreate(forms.ModelForm):
-    # tag = forms.ModelMultipleChoiceField(queryset=Tag.objects.all(),
-    #                                      widget=forms.CheckboxSelectMultiple)
-
     title = forms.CharField(
         label=("Title"),
         widget=forms.TextInput(attrs={
@@ -127,6 +124,11 @@ class QuestionCreate(forms.ModelForm):
 
 class AnswerCreate(forms.ModelForm):
     pk = forms.IntegerField(),
+
+    # is_useful = forms.BooleanField(
+    #     label=('Is Useful?'),
+    #     widget=forms.HiddenInput
+    # )
 
     label = ("Comment"),
     content = forms.CharField(

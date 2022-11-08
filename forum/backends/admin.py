@@ -54,8 +54,8 @@ class QuestionAdmin(admin.ModelAdmin):
 
 
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'content', 'author', 'created_at')
-    list_editable = ('content', 'author')
+    list_display = ('id', 'content', 'author', 'created_at', 'is_useful')
+    list_editable = ('content', 'author', 'is_useful')
 
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('id', 'content', 'author', 'created_at')
