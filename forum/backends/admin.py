@@ -48,28 +48,28 @@ class UserAdmin(BaseUserAdmin):
 #         super().save_model(request, obj, form, change)
 
 
-class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'content', 'author', 'created_at')
-    list_editable = ('title', 'author')
+# class QuestionAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'title', 'content', 'author', 'created_at')
+#     list_editable = ('title', 'author')
 
 
-class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'content', 'author', 'created_at', 'is_useful')
-    list_editable = ('content', 'author', 'is_useful')
-
-class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'content', 'author', 'created_at')
-    list_editable = ('content', 'author')
-
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'is_staff', 'image', )
-    list_editable = ('is_staff', 'image',)
+# class AnswerAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'content', 'author', 'created_at', 'is_useful')
+#     list_editable = ('content', 'author', 'is_useful')
+#
+# class CommentAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'content', 'author', 'created_at')
+#     list_editable = ('content', 'author')
+#
+# class UserAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'username', 'is_staff', 'image', )
+#     list_editable = ('is_staff', 'image',)
 
 
 #admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
-admin.site.register(Question, QuestionAdmin)
-admin.site.register(Answer, AnswerAdmin)
-admin.site.register(Comment, CommentAdmin)
+# admin.site.register(Question, QuestionAdmin)
+# admin.site.register(Answer, AnswerAdmin)
+# admin.site.register(Comment, CommentAdmin)
 admin.site.register(Tag)
 

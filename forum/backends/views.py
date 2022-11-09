@@ -1,10 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import F
 
 from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate, UserPhotoUpdate
-from .models import Question, Comment, Answer, User, Tag
+from .models import Question, Comment, Answer, User, Tag, Voting
 
 
 def user_registation(request):
@@ -72,8 +73,10 @@ def ask_a_guestion(request):
         form = QuestionCreate(request.POST)
         if form.is_valid():
             print(request.POST)
+            voting = Voting.objects.create(count_up=0, count_down=0)
             question = form.save(commit=False)
             question.author = request.user
+            question.voting = voting
             question.save()
 
             list_of_tags = request.POST.getlist('tags')
@@ -126,9 +129,31 @@ def update_question(request, question_id):
     return render(request, 'backends/create_post.html', context)
 
 
+def question_rating_up(request, question_id):
+    #.select_related('author')
+    question = Question.objects.get(pk=question_id)
+    user = User.objects.get(pk=request.user.id)
+    User.voting.through.objects.create(value='1', user_id=request.user.id, voting_id=question.voting.id)
+    voting = Voting.objects.get(pk=question.voting.id)
+    voting.count_up = F('count_up') + 1
+    voting.save()
+    return redirect(question.get_absolute_url())
+
+
+def question_rating_down(request, question_id):
+    question = Question.objects.get(pk=question_id)
+    user = User.objects.get(pk=request.user.id)
+    print('создал в промежуточной')
+    User.voting.through.objects.create(value='0', user_id=request.user.id, voting_id=question.voting.id)
+    voting = Voting.objects.get(pk=question.voting.id)
+    voting.count_down = F('count_down') - 1
+    voting.save()
+    return redirect(question.get_absolute_url())
+
+
 def view_question(request, question_id):
-    question = Question.objects.select_related('author').get(pk=question_id)
-    answer = Answer.objects.select_related('author').all().filter(question_id=question.pk)
+    question = Question.objects.select_related('author', 'voting').get(pk=question_id)
+    answer = Answer.objects.select_related('author', 'voting').all().filter(question_id=question.pk)
 
     if request.method == "POST":
         if not request.user.is_authenticated:
@@ -148,9 +173,11 @@ def view_question(request, question_id):
         else:
             form = AnswerCreate(request.POST)
             if form.is_valid():
+                voting = Voting.objects.create(count_up=0, count_down=0)
                 answer_form = form.save(commit=False)
                 answer_form.question_id = question.pk
                 answer_form.author = request.user
+                answer_form.voting = voting
                 form.save()
             else:
                 messages.error(request, "Форма не прошла валидацию!")
@@ -167,6 +194,33 @@ def view_question(request, question_id):
         'comment': comment,
     }
     return render(request, 'backends/view_thread.html', context=context)
+
+
+def answer_rating_up(request, question_id, answer_id):
+    question = Question.objects.get(pk=question_id)
+    answer = Answer.objects.get(pk=answer_id)
+    user = User.objects.get(pk=request.user.id)
+    User.voting.through.objects.create(value='1', user_id=request.user.id, voting_id=answer.voting.id)
+    Voting.objects.filter(pk=answer.voting.id).update(count_up=F('count_up')+1)
+    voting = Voting.objects.get(pk=answer.voting.id)
+    # if answer.total > 9:
+    #     comment_is_useful(request, question_id, answer_id)
+    return redirect(question.get_absolute_url())
+
+
+def answer_rating_down(request, question_id, answer_id):
+    question = Question.objects.get(pk=question_id)
+    answer = Answer.objects.get(pk=answer_id)
+    user = User.objects.get(pk=request.user.id)
+    User.voting.through.objects.create(value='0', user_id=request.user.id, voting_id=answer.voting.id)
+    Voting.objects.filter(pk=answer.voting.id).update(count_down=F('count_down') - 1)
+    voting = Voting.objects.get(pk=answer.voting.id)
+    # total = voting.count_up + voting.count_down
+    # if total < 10:
+    #     answer.is_useful = None
+    #     answer.save()
+    #     #comment_is_not_useful(request, question_id, answer_id)
+    return redirect(question.get_absolute_url())
 
 
 def update_comment(request, question_id, answer_id, comment_id):
@@ -194,7 +248,8 @@ def update_comment(request, question_id, answer_id, comment_id):
 
     return render(request, 'backends/update_comment.html', locals())
 
-def update_status_comment(request, question_id, answer_id):
+
+def update_status(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
     answer = Answer.objects.get(pk=answer_id, question_id=question_id)
     if answer.is_useful:
@@ -205,9 +260,20 @@ def update_status_comment(request, question_id, answer_id):
         answer.save()
     return redirect(question.get_absolute_url())
 
-@login_required
+def comment_is_not_useful(request, question_id, answer_id):
+    question = Question.objects.get(pk=question_id)
+    answer = Answer.objects.get(pk=answer_id, question_id=question_id)
+    answer.is_useful = None
+    answer.save()
+    return f'answer.is_useful'
+
+
 def view_profile(request, user_id):
     user = User.objects.get(pk=user_id)
+
+    if not request.user.is_authenticated:
+        messages.error(request, "Вы должны быть авторизованы для просмотра профиля!")
+        return redirect('/login')
 
     if request.method == "POST":
         form = UserPhotoUpdate(request.POST, request.FILES, instance=user)
@@ -230,17 +296,28 @@ def view_profile(request, user_id):
 
 def delete_answer(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
-    Answer.objects.get(pk=answer_id).delete()
+    answer = Answer.objects.get(pk=answer_id)
+    if request.user.id != answer.author.id:
+        messages.error(request, "У вас нету прав для удаления комментария!")
+        return redirect('/login')
+    else:
+        Voting.objects.get(pk=answer.voting.id).delete()
     return redirect(question.get_absolute_url())
 
 
-# @user_passes_test(lambda u: u.is_staff)
 def delete_comment(request, question_id, answer_id, comment_id):
     question = Question.objects.get(pk=question_id)
-    Comment.objects.get(pk=comment_id).delete()
+    comment = Comment.objects.get(pk=comment_id)
+    if request.user != comment.pk:
+        messages.error(request, "У вас нету прав для удаления комментария!")
+        return redirect('/login')
+    else:
+        Comment.objects.get(pk=comment_id).delete()
     return redirect(question.get_absolute_url())
 
 
+@user_passes_test(lambda u: u.is_staff)
 def delete_question(request, question_id):
-    Question.objects.get(pk=question_id).delete()
+    question = Question.objects.get(pk=question_id)
+    Voting.objects.get(pk=question.voting.id).delete()
     return redirect('/')
