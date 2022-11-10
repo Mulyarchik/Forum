@@ -83,3 +83,6 @@ class UserVoting(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     voting = models.ForeignKey(Voting, on_delete=models.CASCADE)
     value = models.IntegerField(verbose_name='Value')
+
+    class Meta:
+        unique_together = ['user', 'voting']

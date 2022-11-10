@@ -92,7 +92,7 @@
                         <div class="card-text text-end">
                             <a href="{% url 'vlads_app:answer_rating_up' question.id item_answer.id %}" role="button"
                                style="text-decoration: none;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="currentColor"
+                                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor"
                                      class="bi bi-chevron-up" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
                                           d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
@@ -111,7 +111,7 @@
                         <div class="card-text text-end">
                             <a href="{% url 'vlads_app:answer_rating_down' question.id item_answer.id %}" role="button"
                                style="text-decoration: none;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="currentColor"
+                                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor"
                                      class="bi bi-chevron-down" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
                                           d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
@@ -119,6 +119,15 @@
                             </a>
                         </div>
                     </div>
+                    {% if item_answer.is_useful %}
+                    <div class="col">
+                        <div class="card-text text-end">
+                            <div class="card-text mt-3">
+                                <img src="/media/green_check.jpg" width="30" height="30" alt="logo">
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
                 <div class="card-body col-11">

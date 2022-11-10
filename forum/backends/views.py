@@ -1,8 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import F
+from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate, UserPhotoUpdate
 from .models import Question, Comment, Answer, User, Tag, Voting
@@ -57,7 +57,7 @@ def user_logout(request):
 
 
 def backends(request):
-    question = Question.objects.select_related('author').order_by('-created_at')
+    question = Question.objects.select_related('author', 'voting').order_by('-created_at')
 
     return render(request, 'backends/backends.html', {'thread': question})
 
@@ -130,9 +130,13 @@ def update_question(request, question_id):
 
 
 def question_rating_up(request, question_id):
-    #.select_related('author')
     question = Question.objects.get(pk=question_id)
     user = User.objects.get(pk=request.user.id)
+
+    if User.voting.through.objects.get(user_id=request.user.id, voting_id=question.voting.id):
+        messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
+        return redirect(question.get_absolute_url())
+
     User.voting.through.objects.create(value='1', user_id=request.user.id, voting_id=question.voting.id)
     voting = Voting.objects.get(pk=question.voting.id)
     voting.count_up = F('count_up') + 1
@@ -143,7 +147,13 @@ def question_rating_up(request, question_id):
 def question_rating_down(request, question_id):
     question = Question.objects.get(pk=question_id)
     user = User.objects.get(pk=request.user.id)
-    print('создал в промежуточной')
+
+    # !!!!!!!!!!!!
+    if User.voting.through.objects.get(user_id=request.user.id, voting_id=question.voting.id):
+        messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
+        return redirect(question.get_absolute_url())
+
+    # !!!!!!!!!!!!
     User.voting.through.objects.create(value='0', user_id=request.user.id, voting_id=question.voting.id)
     voting = Voting.objects.get(pk=question.voting.id)
     voting.count_down = F('count_down') - 1
@@ -151,7 +161,7 @@ def question_rating_down(request, question_id):
     return redirect(question.get_absolute_url())
 
 
-def view_question(request, question_id):
+def comment_answer_create(request, question_id):
     question = Question.objects.select_related('author', 'voting').get(pk=question_id)
     answer = Answer.objects.select_related('author', 'voting').all().filter(question_id=question.pk)
 
@@ -200,11 +210,13 @@ def answer_rating_up(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
     answer = Answer.objects.get(pk=answer_id)
     user = User.objects.get(pk=request.user.id)
+
+    if User.voting.through.objects.get(user_id=request.user.id, voting_id=answer.voting.id):
+        messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
+        return redirect(question.get_absolute_url())
+
     User.voting.through.objects.create(value='1', user_id=request.user.id, voting_id=answer.voting.id)
-    Voting.objects.filter(pk=answer.voting.id).update(count_up=F('count_up')+1)
-    voting = Voting.objects.get(pk=answer.voting.id)
-    # if answer.total > 9:
-    #     comment_is_useful(request, question_id, answer_id)
+    Voting.objects.filter(pk=answer.voting.id).update(count_up=F('count_up') + 1)
     return redirect(question.get_absolute_url())
 
 
@@ -212,14 +224,13 @@ def answer_rating_down(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
     answer = Answer.objects.get(pk=answer_id)
     user = User.objects.get(pk=request.user.id)
+
+    if User.voting.through.objects.get(user_id=request.user.id, voting_id=answer.voting.id):
+        messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
+        return redirect(question.get_absolute_url())
+
     User.voting.through.objects.create(value='0', user_id=request.user.id, voting_id=answer.voting.id)
     Voting.objects.filter(pk=answer.voting.id).update(count_down=F('count_down') - 1)
-    voting = Voting.objects.get(pk=answer.voting.id)
-    # total = voting.count_up + voting.count_down
-    # if total < 10:
-    #     answer.is_useful = None
-    #     answer.save()
-    #     #comment_is_not_useful(request, question_id, answer_id)
     return redirect(question.get_absolute_url())
 
 
@@ -259,6 +270,7 @@ def update_status(request, question_id, answer_id):
         answer.is_useful = True
         answer.save()
     return redirect(question.get_absolute_url())
+
 
 def comment_is_not_useful(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
