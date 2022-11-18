@@ -4,33 +4,33 @@ NickForum - Forum for coders
 {% endblock %}
 
 {% block content %}
-{% for item in thread %}
+{% for question in questions %}
 <div class="container-xl">
     <div class="card mb-3 mt-4">
-        {% if item.tag %}
+        {% if question.tag %}
         <div class="card-header">
-            {% for item_tag in item.tag.all %}
-            {{ item_tag.name }};
+            {% for tag in question.tag.all %}
+            {{ tag.name }};
             {% endfor %}
         </div>
         {% endif %}
         <div class="card-body">
-            <a href="{{ item.get_absolute_url }}" style="text-decoration: none;">
+            <a href="{{ question.get_absolute_url }}" style="text-decoration: none;">
                 <p class="card-text">
-                    {{ item.title }}</p>
+                    {{ question.title }}</p>
                 <div class="mt-3">
-                    <a href="{% url 'vlads_app:profile' item.author.id %}" style="text-decoration: none;">
+                    <a href="{% url 'vlads_app:profile' question.author.id %}" style="text-decoration: none;">
                         <p class="card-text"><small class="text-muted">
-                            {% if item.author.image %}
-                            <img src="{{ item.author.image.url }}" width="30" height="30">
+                            {% if question.author.image %}
+                            <img src="{{ question.author.image.url }}" width="30" height="30">
                             {% else %}
                             {% load static %}
                             <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30" height="30"
                                  alt="logo">
                             {% endif %}
-                            &nbsp;{{ item.author.username }}&ensp;</small>
+                            &nbsp;{{ question.author.username }}&ensp;</small>
                     </a>
-                    <small>{{ item.created_at|date:"M. d. Y H:i" }}</small>
+                    <small>{{ question.created_at|date:"M. d. Y H:i" }}</small>
                     </p>
                 </div>
             </a>

@@ -52,6 +52,7 @@
                         <hr>
                         <footer>
                             <p class="card-text">
+                                <a href="{% url 'vlads_app:profile' question.author.id %}" style="text-decoration: none;">
                                 {% if question.author.image %}
                                 <img src="{{ question.author.image.url }}" width="30" height="30">&nbsp;
                                 {% else %}
@@ -59,7 +60,7 @@
                                 <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30" height="30"
                                      alt="logo">&nbsp;
                                 {% endif %}
-                                <small class="text-muted">{{ question.author }} {{ question.created_at|date:"M. d. Y H:i" }}</small>
+                                <small class="text-muted">{{ question.author }}</a> {{ question.created_at|date:"M. d. Y H:i" }}</small>
                                 {% if request.user.is_staff %}
                                 <a href="{% url 'vlads_app:post_update' question.id %}" role="button"
                                    style="text-decoration: none;">&nbsp;&nbsp;Update</a>
@@ -80,17 +81,17 @@
     </div>
 
     <h5>Answers:</h5>
-    {% for item_answer in answer %}
+    {% for answer in answers %}
     <div class="card mt-4">
-        {% if request.user == item_answer.author %}
+        {% if request.user == answer.author %}
         <div class="card-body">
         {% endif %}
             <div class="row ">
-                {% if request.user != item_answer.author %}
+                {% if request.user != answer.author %}
                 <div class="card-body col-auto">
                     <div class="col">
                         <div class="card-text text-end">
-                            <a href="{% url 'vlads_app:answer_rating_up' question.id item_answer.id %}" role="button"
+                            <a href="{% url 'vlads_app:answer_rating_up' question.id answer.id %}" role="button"
                                style="text-decoration: none;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor"
                                      class="bi bi-chevron-up" viewBox="0 0 16 16">
@@ -103,13 +104,13 @@
                     <div class="col">
                         <div class="card-text text-end">
                             <a role="textbox"
-                               style="text-decoration: none;">{{item_answer.voting.count_up|add:item_answer.voting.count_down}}&nbsp;
+                               style="text-decoration: none;">{{answer.voting.count_up|add:answer.voting.count_down}}&nbsp;
                             </a>
                         </div>
                     </div>
                     <div class="col">
                         <div class="card-text text-end">
-                            <a href="{% url 'vlads_app:answer_rating_down' question.id item_answer.id %}" role="button"
+                            <a href="{% url 'vlads_app:answer_rating_down' question.id answer.id %}" role="button"
                                style="text-decoration: none;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor"
                                      class="bi bi-chevron-down" viewBox="0 0 16 16">
@@ -119,10 +120,10 @@
                             </a>
                         </div>
                     </div>
-                    {% if item_answer.is_useful %}
+                    {% if answer.is_useful %}
                     <div class="col">
                         <div class="card-text text-end">
-                            <div class="card-text mt-3">
+                            <div class="card-text mt-1">
                                 <img src="/media/green_check.jpg" width="30" height="30" alt="logo">
                             </div>
                         </div>
@@ -131,84 +132,86 @@
                 </div>
                 {% endif %}
                 <div class="card-body col-11">
-                    <p class="card-text">{{ item_answer.content }}</p>
+                    <p class="card-text">{{ answer.content }}</p>
                     <hr>
                     <p class="card-text">
+                        <a href="{% url 'vlads_app:profile' answer.author.id %}" style="text-decoration: none;">
                         <small class="text-muted">
-                            {% if item_answer.author.image %}
-                            <img src="{{ item_answer.author.image.url }}" width="30" height="30">&nbsp;
+                            {% if answer.author.image %}
+                            <img src="{{ answer.author.image.url }}" width="30" height="30">&nbsp;
                             {% else %}
                             {% load static %}
                             <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30" height="30"
                                  alt="logo">&nbsp;
                             {% endif %}
-                            {{ item_answer.author.username }} {{ item_answer.created_at|date:"M. d. Y H:i" }}
+                            {{ answer.author.username }}</a> {{ answer.created_at|date:"M. d. Y H:i" }}
                         </small>
                         {% if request.user.is_staff %}
-                        <a href="{% url 'vlads_app:update_comment' question.id item_answer.id 0 %}" role="button"
+                        <a href="{% url 'vlads_app:update_comment' question.id answer.id 0 %}" role="button"
                            style="text-decoration: none;">&nbsp;&nbsp;Update</a>
-                        <a href="{% url 'vlads_app:delete_answer' question.id item_answer.id %}" role="button"
+                        <a href="{% url 'vlads_app:delete_answer' question.id answer.id %}" role="button"
                            style="text-decoration: none;">&nbsp;&nbsp;Delete</a>
-                        {% if request.user != item_answer.author %}
+                        {% if request.user != answer.author %}
                         <a href="#formreply" style="text-decoration: none;"
-                           onclick="formReply( '{{ item_answer.author.username }}', '{{ item_answer.id }}' )">&nbsp;&nbsp;Reply</a>
+                           onclick="formReply( '{{ answer.author.username }}', '{{ answer.id }}' )">&nbsp;&nbsp;Reply</a>
                         {% endif %}
                         {% elif request.user == question.author %}
-                        <a href="{% url 'vlads_app:update_status_comment' question.id item_answer.id %}"
+                        <a href="{% url 'vlads_app:update_status_comment' question.id answer.id %}"
                            role="button"
                            style="text-decoration: none;">&nbsp;&nbsp;Is Useful?</a>
-                        {% if request.user != item_answer.author %}
+                        {% if request.user != answer.author %}
                         <a href="#formreply" style="text-decoration: none;"
-                           onclick="formReply( '{{ item_answer.author.username }}', '{{ item_answer.id }}' )">Reply</a>
+                           onclick="formReply( '{{ answer.author.username }}', '{{ answer.id }}' )">Reply</a>
                         {% endif %}
-                        {% elif request.user == item_answer.author %}
-                        <a href="{% url 'vlads_app:update_comment' question.id item_answer.id 0 %}" role="button"
+                        {% elif request.user == answer.author %}
+                        <a href="{% url 'vlads_app:update_comment' question.id answer.id 0 %}" role="button"
                            style="text-decoration: none;">&nbsp;&nbsp;Update</a>
-                        <a href="{% url 'vlads_app:delete_answer' question.id item_answer.id %}" role="button"
+                        <a href="{% url 'vlads_app:delete_answer' question.id answer.id %}" role="button"
                            style="text-decoration: none;">&nbsp;&nbsp;Delete</a>
                         {% else %}
                         <a href="#formreply" style="text-decoration: none;"
-                           onclick="formReply( '{{ item_answer.author.username }}', '{{ item_answer.id }}' )">Reply</a>
+                           onclick="formReply( '{{ answer.author.username }}', '{{ answer.id }}' )">Reply</a>
                         {% endif %}
                     </p>
                 </div>
             </div>
-            {% if request.user == item_answer.author %}
+            {% if request.user == answer.author %}
         </div>
         {% endif %}
     </div>
-    {% for item_comment in comment %}
-    {% if item_comment.answer_id == item_answer.id %}
+    {% for comment in comments %}
+    {% if comment.answer_id == answer.id %}
     <div class="card mt-1 ms-5">
         <div class="card-body">
-            <p class="card-text">{{ item_comment.content }}</p>
+            <p class="card-text">{{ comment.content }}</p>
             <hr>
             <p class="card-text">
                 <small class="text-muted">
-                    {% if item_comment.author.image %}
-                    <img src="{{ item_comment.author.image.url }}" width="30" height="30">&nbsp;
+                    <a href="{% url 'vlads_app:profile' comment.author.id %}" style="text-decoration: none;">
+                    {% if comment.author.image %}
+                    <img src="{{ comment.author.image.url }}" width="30" height="30">&nbsp;
                     {% else %}
                     {% load static %}
                     <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30" height="30"
                          alt="logo">&nbsp;
                     {% endif %}
-                    {{ item_comment.author.username }} {{ item_comment.created_at|date:"M. d. Y H:i" }}
+                    {{ comment.author.username }}</a> {{ comment.created_at|date:"M. d. Y H:i" }}
                 </small>
 
                 {% if request.user.is_staff %}
-                <a href="{% url 'vlads_app:update_comment' question.id item_comment.answer_id item_comment.id  %}"
+                <a href="{% url 'vlads_app:update_comment' question.id comment.answer_id comment.id  %}"
                    role="button"
                    style="text-decoration: none;">&nbsp;&nbsp;Update</a>
-                <a href="{% url 'vlads_app:delete_comment' question.id question.id item_comment.id %}"
+                <a href="{% url 'vlads_app:delete_comment' question.id question.id comment.id %}"
                    role="button"
                    style="text-decoration: none;">&nbsp;&nbsp;Delete</a>
-                {% if request.user != item_comment.author %}
+                {% if request.user != comment.author %}
                 <a href="#formreply" style="text-decoration: none;"
-                   onclick="formReply('{{ item_comment.author.username }}', '{{ item_comment.answer_id }}')">&nbsp;&nbsp;Reply</a>
+                   onclick="formReply('{{ comment.author.username }}', '{{ comment.answer_id }}')">&nbsp;&nbsp;Reply</a>
                 {% endif %}
-                {% elif request.user != item_comment.author %}
+                {% elif request.user != comment.author %}
                 <a href="#formreply" style="text-decoration: none;"
-                   onclick="formReply('{{ item_comment.author.username }}', '{{ item_comment.answer_id }}')">&nbsp;&nbsp;Reply</a>
+                   onclick="formReply('{{ comment.author.username }}', '{{ comment.answer_id }}')">&nbsp;&nbsp;Reply</a>
                 {% endif %}
             </p>
         </div>

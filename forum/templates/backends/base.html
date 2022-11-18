@@ -32,17 +32,17 @@
             <div class="search" id="loginned">
                 <ul class="me-auto mb-lg-0">
                     {% if user.image %}
-                    <img src="{{ user.image.url }}" width="30" height="30">&nbsp;
+                    <img src="{{ request.user.image.url }}" width="30" height="30">&nbsp;
                     {% else %}
                     {% load static %}
                     <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30" height="30" alt="logo">&nbsp;
                     {% endif %}
-                    &nbsp;{{ user.username }}&ensp;
+                    &nbsp;{{ request.user.username }}&ensp;
                     <div class="btn-group">
                         <a href="#menu" data-bs-toggle="dropdown"><img src="/media/menu.png" width="30" height="30"
                                                                        alt="logo"> </a>
                         <ul class="dropdown-menu dropdown-menu-lg-end">
-                            <li><a class="btn btn-link" href="{% url 'vlads_app:profile' user.id %}" role="button"
+                            <li><a class="btn btn-link" href="{% url 'vlads_app:profile' request.user.id %}" role="button"
                                    style="text-decoration: none;">Профиль</a></li>
                             <li><a class="btn btn-link" href="/logout" role="button" style="text-decoration: none;">Выйти</a>
                             </li>
