@@ -40,7 +40,7 @@ def user_login(request):
             user = form.get_user()
             login(request, user)
         else:
-            messages.error(request, "Форма не прошла валидацию!")
+            messages.error(request, "Неправильное имя пользователя/пароль!")
         return redirect('/')
     else:
         form = LoginUserForm()
@@ -87,13 +87,17 @@ def ask_a_guestion(request):
         return redirect('/')
     else:
         form = QuestionCreate()
-    return render(request, 'backends/create_post.html', locals())
+    context = {
+        'form': form,
+        'tags': tag,
+
+    }
+    return render(request, 'backends/create_post.html', context=context)
 
 
 def update_question(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     tag = Tag.objects.all()
-    # question = Question.objects.prefetch_related('tag').get(pk=question_id)
 
     if request.method == 'GET':
         print('РЕДАКТИРОВАНИЕ ГЕТ')
@@ -147,12 +151,10 @@ def question_rating_down(request, question_id):
     question = Question.objects.get(pk=question_id)
     user = User.objects.get(pk=request.user.id)
 
-    # !!!!!!!!!!!!
-    if User.voting.through.objects.get(user_id=request.user.id, voting_id=question.voting.id):
+    if User.voting.through.objects.filter(user_id=request.user.id, voting_id=question.voting.id):
         messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
         return redirect(question.get_absolute_url())
 
-    # !!!!!!!!!!!!
     User.voting.through.objects.create(value='0', user_id=request.user.id, voting_id=question.voting.id)
     voting = Voting.objects.get(pk=question.voting.id)
     voting.count_down = F('count_down') - 1
@@ -265,18 +267,14 @@ def update_status(request, question_id, answer_id):
     if answer.is_useful:
         answer.is_useful = None
         answer.save()
+        messages.error(request, "Убран статус полезного ответа!")
     else:
         answer.is_useful = True
         answer.save()
+        messages.success(request, "Установлен статус полезного ответа!")
+
     return redirect(question.get_absolute_url())
 
-
-def comment_is_not_useful(request, question_id, answer_id):
-    question = Question.objects.get(pk=question_id)
-    answer = Answer.objects.get(pk=answer_id, question_id=question_id)
-    answer.is_useful = None
-    answer.save()
-    return f'answer.is_useful'
 
 
 def view_profile(request, user_id):
