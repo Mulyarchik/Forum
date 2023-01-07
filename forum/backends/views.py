@@ -59,11 +59,11 @@ def user_logout(request):
 def backends(request):
     question = Question.objects.select_related('author', 'voting').order_by('-created_at')
 
-    return render(request, 'backends/backends.html', {'thread': question})
+    return render(request, 'backends/backends.html', {'questions': question})
 
 
 def ask_a_guestion(request):
-    tag = Tag.objects.all().order_by('-name')
+    tags = Tag.objects.all().order_by('-name')
     if not request.user.is_authenticated:
         error = ''
         messages.error(request, "Для создания вопроса вам необходимо авторизоваться")
@@ -72,7 +72,6 @@ def ask_a_guestion(request):
     if request.method == "POST":
         form = QuestionCreate(request.POST)
         if form.is_valid():
-            print(request.POST)
             voting = Voting.objects.create(count_up=0, count_down=0)
             question = form.save(commit=False)
             question.author = request.user
@@ -81,8 +80,8 @@ def ask_a_guestion(request):
 
             list_of_tags = request.POST.getlist('tags')
             for item_tag in list_of_tags:
-                tag = Tag.objects.get(pk=item_tag)
-                question.tag.add(tag)
+                tags = Tag.objects.get(pk=item_tag)
+                question.tag.add(tags)
         else:
             messages.error(request, "Форма не прошла валидацию!")
         return redirect('/')
@@ -124,7 +123,7 @@ def update_question(request, question_id):
     context = {
         'form': form,
         'question': question,
-        'tag': tag
+        'tags': tag
     }
     return render(request, 'backends/create_post.html', context)
 
@@ -133,7 +132,7 @@ def question_rating_up(request, question_id):
     question = Question.objects.get(pk=question_id)
     user = User.objects.get(pk=request.user.id)
 
-    if User.voting.through.objects.get(user_id=request.user.id, voting_id=question.voting.id):
+    if User.voting.through.objects.filter(user_id=request.user.id, voting_id=question.voting.id):
         messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
         return redirect(question.get_absolute_url())
 
@@ -198,10 +197,10 @@ def comment_answer_create(request, question_id):
     comment = Comment.objects.select_related('author')
 
     context = {
-        'answer': answer,
+        'answers': answer,
         'question': question,
         'form': form,
-        'comment': comment,
+        'comments': comment,
     }
     return render(request, 'backends/view_thread.html', context=context)
 
@@ -211,7 +210,7 @@ def answer_rating_up(request, question_id, answer_id):
     answer = Answer.objects.get(pk=answer_id)
     user = User.objects.get(pk=request.user.id)
 
-    if User.voting.through.objects.get(user_id=request.user.id, voting_id=answer.voting.id):
+    if User.voting.through.objects.filter(user_id=request.user.id, voting_id=answer.voting.id):
         messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
         return redirect(question.get_absolute_url())
 
@@ -225,7 +224,7 @@ def answer_rating_down(request, question_id, answer_id):
     answer = Answer.objects.get(pk=answer_id)
     user = User.objects.get(pk=request.user.id)
 
-    if User.voting.through.objects.get(user_id=request.user.id, voting_id=answer.voting.id):
+    if User.voting.through.objects.filter(user_id=request.user.id, voting_id=answer.voting.id):
         messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
         return redirect(question.get_absolute_url())
 

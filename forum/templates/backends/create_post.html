@@ -1,38 +1,38 @@
 {% extends "backends/base.html" %}
 
 {% block title %}
-Create post
+    Create post
 {% endblock %}
 
 {% block content %}
 
-<div class="container-sm">
-    <div class="mb-3">
-        <form method="post" action={% if post %}
-        "{% url 'vlads_app:post_update' question_id=question.id %}"
-        {% endif %}>
-        {% csrf_token %}
+    <div class="container-sm">
+        <div class="mb-3">
+            <form method="post" action={% if post %}
+                "{% url 'vlads_app:post_update' question_id=question.id %}"
+            {% endif %}>
+                {% csrf_token %}
 
-        <label for="tags" class="text">Tags:</label>
-        <select class="js-example-basic-multiple" name="tags" multiple="multiple" style="width: 100%" id="tags">
-            {% for item_tag in tag %}
-            <option value="{{ item_tag.id }}">{{ item_tag.name }}</option>
-            {% endfor %}
-        </select>
+                <label for="tags" class="text">Tags:</label>
+                <select class="js-example-basic-multiple" name="tags" multiple="multiple" style="width: 100%" id="tags">
+                    {% for tag in tags %}
+                        <option value="{{ tag.id }}">{{ tag.name }}</option>
+                    {% endfor %}
+                </select>
 
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary col-md-4">Create / Update Post</button>
-        </form>
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary col-md-4">Create / Update Post</button>
+            </form>
+        </div>
     </div>
-</div>
-<script>
-    $(document).ready(function () {
+    <script>
+        $(document).ready(function () {
 
-        $('.js-example-basic-multiple').select2();
-        $(".js-example-responsive").select2({
-            width: '80%' // необходимо переопределить измененное значение по умолчанию
+            $('.js-example-basic-multiple').select2();
+            $(".js-example-responsive").select2({
+                width: '80%' // необходимо переопределить измененное значение по умолчанию
+            });
         });
-    });
 
-</script>
+    </script>
 {% endblock %}
