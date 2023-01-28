@@ -1,10 +1,15 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models, transaction
+from django.db.models import F
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=20, verbose_name='tag')
+    name = models.CharField(max_length=30, verbose_name='tag')
+
+    class Meta:
+        app_label = 'backends'
 
     def __str__(self):
         return '{0} ({1})'.format(self.id, self.name)
@@ -29,9 +34,57 @@ class Question(models.Model):
     def __str__(self):
         return self.title
 
-    class Meta:
-        verbose_name = 'Question'
-        verbose_name_plural = 'Questions'
+    @transaction.atomic
+    def create_question(self, user, request_post, count_up, count_down):
+        if count_up == 0 and count_down == 0:
+            new_voting = Voting.objects.create(count_up=count_up, count_down=count_down)
+
+        self.title = request_post['title']
+        self.content = request_post['content']
+        self.author = user
+        self.voting = new_voting
+        super(Question, self).save(request_post)
+
+        list_of_tags = request_post.getlist('tags')
+        for item_tag in list_of_tags:
+            tags = Tag.objects.get(pk=item_tag)
+            self.tag.add(tags)
+
+    def get_vote_by(self, user_id):
+        try:
+            user_vote = self.author.voting.through.objects.get(user_id=user_id, voting_id=self.voting_id)
+            if user_vote.value == 0:
+                return 'DOWN'
+            if user_vote.value == 1:
+                return 'UP'
+        except ObjectDoesNotExist:
+            return None
+
+    def vote_up(self, user_id):
+        if self.get_vote_by(user_id):
+            raise AlreadyVoted()
+
+        self.author.voting.through.objects.create(value='1', user_id=user_id, voting_id=self.voting_id)
+        self.voting.__class__.objects.filter(pk=self.voting_id).update(count_up=F('count_up') + 1)
+
+
+    def vote_down(self, user_id):
+        if self.get_vote_by(user_id):
+            raise AlreadyVoted()
+
+        self.author.voting.through.objects.create(value='0', user_id=user_id, voting_id=voting_id)
+        self.voting.__class__.objects.filter(pk=voting_id).update(count_down=F('count_down') - 1)
+
+
+class Meta:
+    app_label = 'backends'
+    verbose_name = 'Question'
+    verbose_name_plural = 'Questions'
+
+
+class AlreadyVoted(Exception):
+    "Raised then users tries to vote on a question more than 1 time"
+    pass
 
 
 class Answer(models.Model):
@@ -47,6 +100,29 @@ class Answer(models.Model):
         verbose_name_plural = 'Answers'
         ordering = ['is_useful']
 
+    def create(self, question, user, request_post, count_up, count_down):
+        if count_up == 0 and count_down == 0:
+            new_voting = Voting.objects.create(count_up=count_up, count_down=count_down)
+
+        print(request_post)
+        self.content = request_post['content']
+        self.author = user
+        self.question = question
+        self.voting = new_voting
+        super(Answer, self).save(request_post)
+
+    def voting_check(self, user_id, voting_id):
+        if self.author.voting.through.objects.filter(user_id=user_id, voting_id=voting_id):
+            return True
+
+    def rating_up(self, user_id, voting_id):
+        self.author.voting.through.objects.create(value='1', user_id=user_id, voting_id=voting_id)
+        self.voting.__class__.objects.filter(pk=voting_id).update(count_up=F('count_up') + 1)
+
+    def rating_down(self, user_id, voting_id):
+        self.author.voting.through.objects.create(value='0', user_id=user_id, voting_id=voting_id)
+        self.voting.__class__.objects.filter(pk=voting_id).update(count_down=F('count_down') - 1)
+
     def __str__(self):
         return self.content
 
@@ -60,6 +136,12 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
+
+    def create(self, answer, user, request_post):
+        self.content = request_post['content']
+        self.author = user
+        self.answer = Answer.objects.get(pk=answer)
+        super(Comment, self).save(request_post)
 
     def __str__(self):
         return self.content

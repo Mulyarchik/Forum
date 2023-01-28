@@ -1,11 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import F
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate, UserPhotoUpdate
-from .models import Question, Comment, Answer, User, Tag, Voting
+from .models import Question, Comment, Answer, User, Tag, Voting, AlreadyVoted
 
 
 def user_registation(request):
@@ -17,10 +17,10 @@ def user_registation(request):
             user = user_form.save(commit=False)
             user_form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            messages.success(request, "Вы успешно зарегестрировались")
+            messages.success(request, "You have successfully registered!")
             return redirect('/')
         else:
-            messages.error(request, "Ошибка регистрации")
+            messages.error(request, "Registration error")
         context = {
             'user_form': user_form,
             'error': error
@@ -40,7 +40,7 @@ def user_login(request):
             user = form.get_user()
             login(request, user)
         else:
-            messages.error(request, "Неправильное имя пользователя/пароль!")
+            messages.error(request, "Wrong username/password!")
         return redirect('/')
     else:
         form = LoginUserForm()
@@ -64,32 +64,24 @@ def backends(request):
 
 def ask_a_guestion(request):
     tags = Tag.objects.all().order_by('-name')
+
     if not request.user.is_authenticated:
-        error = ''
         messages.error(request, "Для создания вопроса вам необходимо авторизоваться")
         return redirect("/login")
 
     if request.method == "POST":
         form = QuestionCreate(request.POST)
         if form.is_valid():
-            voting = Voting.objects.create(count_up=0, count_down=0)
-            question = form.save(commit=False)
-            question.author = request.user
-            question.voting = voting
-            question.save()
-
-            list_of_tags = request.POST.getlist('tags')
-            for item_tag in list_of_tags:
-                tags = Tag.objects.get(pk=item_tag)
-                question.tag.add(tags)
+            Question().create_question(user=request.user, request_post=request.POST, count_up=0, count_down=0)
         else:
             messages.error(request, "Форма не прошла валидацию!")
         return redirect('/')
     else:
         form = QuestionCreate()
+
     context = {
         'form': form,
-        'tags': tag,
+        'tags': tags,
 
     }
     return render(request, 'backends/create_post.html', context=context)
@@ -100,14 +92,12 @@ def update_question(request, question_id):
     tag = Tag.objects.all()
 
     if request.method == 'GET':
-        print('РЕДАКТИРОВАНИЕ ГЕТ')
         if request.user != question.author:
             messages.error(request, "У вас нету прав для редактирования записи!")
             return redirect(question.get_absolute_url())
         form = QuestionCreate(instance=question)
 
     if request.method == 'POST':
-        print('РЕДАКТИРОВАНИЕ ПОСТ')
         form = QuestionCreate(request.POST, instance=question)
         if form.is_valid():
             form.save()
@@ -133,32 +123,30 @@ def update_question(request, question_id):
 
 
 def question_rating_up(request, question_id):
-    question = Question.objects.get(pk=question_id)
-    user = User.objects.get(pk=request.user.id)
+    try:
+        question = Question.objects.get(id=question_id)
+        current_user = User.objects.get(pk=request.user.id)
+        question.vote_up(current_user.id)
+        messages.success(request, "Your review has been submitted successfully for this entry!")
+    except ObjectDoesNotExist:
+        messages.error(request, f"Question with ID '{question.id}' doesn't exists")
+    except AlreadyVoted:
+        messages.error(request, "You have already voted on that question!")
 
-    if User.voting.through.objects.filter(user_id=request.user.id, voting_id=question.voting.id):
-        messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
-        return redirect(question.get_absolute_url())
-
-    User.voting.through.objects.create(value='1', user_id=request.user.id, voting_id=question.voting.id)
-    voting = Voting.objects.get(pk=question.voting.id)
-    voting.count_up = F('count_up') + 1
-    voting.save()
     return redirect(question.get_absolute_url())
 
 
 def question_rating_down(request, question_id):
-    question = Question.objects.get(pk=question_id)
-    user = User.objects.get(pk=request.user.id)
+    try:
+        question = Question.objects.get(id=question_id)
+        current_user = User.objects.get(pk=request.user.id)
+        question.vote_down(current_user.id)
+        messages.success(request, "Your review has been submitted successfully for this entry!")
+    except ObjectDoesNotExist:
+        messages.error(request, f"Question with ID '{question.id}' doesn't exists")
+    except AlreadyVoted:
+        messages.error(request, "You have already voted on that question!")
 
-    if User.voting.through.objects.filter(user_id=request.user.id, voting_id=question.voting.id):
-        messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
-        return redirect(question.get_absolute_url())
-
-    User.voting.through.objects.create(value='0', user_id=request.user.id, voting_id=question.voting.id)
-    voting = Voting.objects.get(pk=question.voting.id)
-    voting.count_down = F('count_down') - 1
-    voting.save()
     return redirect(question.get_absolute_url())
 
 
@@ -174,24 +162,17 @@ def comment_answer_create(request, question_id):
         if request.POST.get("reply_to"):
             form = CommentCreate(request.POST)
             if form.is_valid():
-                comment = form.save(commit=False)
-                comment.answer = answer.get(pk=request.POST.get("reply_to"))
-                comment.author = request.user
-                comment.save()
+                Comment().create(request.POST.get("reply_to"), request.user, request.POST)
             else:
-                messages.error(request, "Форма не прошла валидацию!")
+                messages.error(request, "Form not validated!")
             return redirect(question.get_absolute_url())
+
         else:
             form = AnswerCreate(request.POST)
             if form.is_valid():
-                voting = Voting.objects.create(count_up=0, count_down=0)
-                answer_form = form.save(commit=False)
-                answer_form.question_id = question.pk
-                answer_form.author = request.user
-                answer_form.voting = voting
-                form.save()
+                Answer().create(question, request.user, request.POST, count_up=0, count_down=0)
             else:
-                messages.error(request, "Форма не прошла валидацию!")
+                messages.error(request, "Form not validated!")
             return redirect(question.get_absolute_url())
     else:
         form = AnswerCreate()
@@ -209,29 +190,29 @@ def comment_answer_create(request, question_id):
 
 def answer_rating_up(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
-    answer = Answer.objects.get(pk=answer_id)
     user = User.objects.get(pk=request.user.id)
+    answer = Answer.objects.get(pk=answer_id)
 
-    if User.voting.through.objects.filter(user_id=request.user.id, voting_id=answer.voting.id):
-        messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
+    if answer.voting_check(user.id, answer.voting_id):
+        messages.error(request, "You have already left your review for this entry!")
         return redirect(question.get_absolute_url())
 
-    User.voting.through.objects.create(value='1', user_id=request.user.id, voting_id=answer.voting.id)
-    Voting.objects.filter(pk=answer.voting.id).update(count_up=F('count_up') + 1)
+    answer.rating_up(user.id, answer.voting_id)
+
     return redirect(question.get_absolute_url())
 
 
 def answer_rating_down(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
-    answer = Answer.objects.get(pk=answer_id)
     user = User.objects.get(pk=request.user.id)
+    answer = Answer.objects.get(pk=answer_id)
 
-    if User.voting.through.objects.filter(user_id=request.user.id, voting_id=answer.voting.id):
-        messages.error(request, "Вы уже оставили свой отзыв на данную запись!")
+    if answer.voting_check(user.id, answer.voting_id):
+        messages.error(request, "You have already left your review for this entry!")
         return redirect(question.get_absolute_url())
 
-    User.voting.through.objects.create(value='0', user_id=request.user.id, voting_id=answer.voting.id)
-    Voting.objects.filter(pk=answer.voting.id).update(count_down=F('count_down') - 1)
+    answer.rating_down(user.id, answer.voting_id)
+
     return redirect(question.get_absolute_url())
 
 
@@ -246,7 +227,7 @@ def update_comment(request, question_id, answer_id, comment_id):
 
     if request.method == 'GET':
         if request.user != answer.author:
-            messages.error(request, "У вас нету прав для редактирования записи!")
+            messages.error(request, "You do not have permission to edit the post!")
             return redirect(question.get_absolute_url())
         form = CommentCreate(instance=answer)
 
@@ -255,7 +236,7 @@ def update_comment(request, question_id, answer_id, comment_id):
         if form.is_valid():
             form.save()
         else:
-            messages.error(request, "Форма не прошла валидацию!")
+            messages.error(request, "Form not validated!")
         return redirect(question.get_absolute_url())
 
     return render(request, 'backends/update_comment.html', locals())
@@ -267,30 +248,29 @@ def update_status(request, question_id, answer_id):
     if answer.is_useful:
         answer.is_useful = None
         answer.save()
-        messages.error(request, "Убран статус полезного ответа!")
+        messages.error(request, "Removed helpful response status!")
     else:
         answer.is_useful = True
         answer.save()
-        messages.success(request, "Установлен статус полезного ответа!")
+        messages.success(request, "Useful response status set!")
 
     return redirect(question.get_absolute_url())
-
 
 
 def view_profile(request, user_id):
     user = User.objects.get(pk=user_id)
 
     if not request.user.is_authenticated:
-        messages.error(request, "Вы должны быть авторизованы для просмотра профиля!")
+        messages.error(request, "You must be logged in to view your profile!")
         return redirect('/login')
 
     if request.method == "POST":
         form = UserPhotoUpdate(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
-            messages.success(request, "Изображение пользователя успешно изменено!")
+            messages.success(request, "User image changed successfully!")
         else:
-            messages.error(request, "Изображение пользователя не было изменено!")
+            messages.error(request, "User picture has not been changed!")
         return redirect('/')
     else:
         form = UserPhotoUpdate()
@@ -306,8 +286,9 @@ def view_profile(request, user_id):
 def delete_answer(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
     answer = Answer.objects.get(pk=answer_id)
+
     if request.user.id != answer.author.id:
-        messages.error(request, "У вас нету прав для удаления комментария!")
+        messages.error(request, "You do not have permission to delete a comment!")
         return redirect('/login')
     else:
         Voting.objects.get(pk=answer.voting.id).delete()
@@ -318,7 +299,7 @@ def delete_comment(request, question_id, answer_id, comment_id):
     question = Question.objects.get(pk=question_id)
     comment = Comment.objects.get(pk=comment_id)
     if request.user != comment.pk:
-        messages.error(request, "У вас нету прав для удаления комментария!")
+        messages.error(request, "You do not have permission to delete a comment!")
         return redirect('/login')
     else:
         Comment.objects.get(pk=comment_id).delete()
