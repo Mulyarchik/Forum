@@ -2,7 +2,9 @@ import factory.fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from .models import User, Question, Tag
+from .models.question import Question
+from .models.tag import Tag
+from .models.user_voting import User
 
 faker = Faker()
 
@@ -22,9 +24,6 @@ class UserFactory(DjangoModelFactory):
 
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
-
-    # username = factory.LazyAttribute(
-    #     lambda obj: factory.fuzzy.FuzzyChoice(names).fuzz() + str(random.randrange(1960, 2010, 1)))
     username = factory.Iterator(names)
     email = factory.Faker("email")
     password = factory.PostGenerationMethodCall('set_password', 'adm1n')

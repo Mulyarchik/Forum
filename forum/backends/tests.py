@@ -2,8 +2,9 @@ import datetime
 
 from django.test import TestCase
 
-# from unittest import TestCase
-from .models import Question, Voting, Tag, User
+from .models.question import Question
+from .models.tag import Tag
+from .models.user_voting import User, Voting
 
 
 class QuestionModelTest(TestCase):

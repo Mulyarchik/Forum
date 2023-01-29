@@ -30,32 +30,32 @@ class Command(BaseCommand):
 
         self.stdout.write("Creating new data...")
         # Create all the users
-        people = []
-        for x in range(NUM_USERS):
-            person = UserFactory()
-            people.append(person)
+        # people = []
+        # for x in range(NUM_USERS):
+        #     person = UserFactory()
+        #     people.append(person)
 
         tags = []
         for _ in range(NUM_VOTING):
             tag = TagFactory()
             tags.append(tag)
 
-        votings = []
-        for _ in range(NUM_TAGS):
-            voting = VotingFactory()
-            votings.append(voting)
-
-        for _ in range(NUM_QUESTIONS):
-            author = random.choice(people)
-            question = QuestionFactory()
-            tag = random.choices(
-                tags,
-                k=QUESTION_TAG
-            )
-            question.tag.add(*tag)
-
-            voting = random.choices(
-                votings,
-                k=QUESTION_VOTING
-            )
-            question.voting.add(*voting)
+        # votings = []
+        # for _ in range(NUM_TAGS):
+        #     voting = VotingFactory()
+        #     votings.append(voting)
+        #
+        # for _ in range(NUM_QUESTIONS):
+        #     author = random.choice(people)
+        #     question = QuestionFactory()
+        #     tag = random.choices(
+        #         tags,
+        #         k=QUESTION_TAG
+        #     )
+        #     question.tag.add(*tag)
+        #
+        #     voting = random.choices(
+        #         votings,
+        #         k=QUESTION_VOTING
+        #     )
+        #     question.voting.add(*voting)

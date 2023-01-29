@@ -5,7 +5,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate, UserPhotoUpdate
-from .models import Question, Comment, Answer, User, Tag, Voting, AlreadyVoted
+from .models.answer import Answer
+from .models.question import Question
+from .models.tag import Tag
+from .models.user_voting import User, Voting, AlreadyVoted
+from .models.comment import Comment
 
 
 def user_registation(request):
@@ -100,16 +104,7 @@ def update_question(request, question_id):
     if request.method == 'POST':
         form = QuestionCreate(request.POST, instance=question)
         if form.is_valid():
-            form.save()
-            for old_item in question.tag.all():
-                my_str = str(old_item)
-                res = my_str.split()[0]
-                Question.tag.through.objects.filter(question_id=question_id, tag_id=res).delete()
-
-            list_of_tags = request.POST.getlist('tags')
-            for item_tag in list_of_tags:
-                tag = Tag.objects.get(pk=item_tag)
-                question.tag.add(tag)
+            question.update(request.user, request.POST)
         else:
             messages.error(request, "Форма не прошла валидацию!")
         return redirect(question.get_absolute_url())
@@ -125,8 +120,7 @@ def update_question(request, question_id):
 def question_rating_up(request, question_id):
     try:
         question = Question.objects.get(id=question_id)
-        current_user = User.objects.get(pk=request.user.id)
-        question.vote_up(current_user.id)
+        question.voting.vote_up(request.user.id)
         messages.success(request, "Your review has been submitted successfully for this entry!")
     except ObjectDoesNotExist:
         messages.error(request, f"Question with ID '{question.id}' doesn't exists")
@@ -139,8 +133,7 @@ def question_rating_up(request, question_id):
 def question_rating_down(request, question_id):
     try:
         question = Question.objects.get(id=question_id)
-        current_user = User.objects.get(pk=request.user.id)
-        question.vote_down(current_user.id)
+        question.voting.vote_up(request.user.id)
         messages.success(request, "Your review has been submitted successfully for this entry!")
     except ObjectDoesNotExist:
         messages.error(request, f"Question with ID '{question.id}' doesn't exists")
@@ -156,7 +149,7 @@ def comment_answer_create(request, question_id):
 
     if request.method == "POST":
         if not request.user.is_authenticated:
-            messages.error(request, "Для ответа вам необходимо авторизоваться")
+            messages.error(request, "You must be logged in to reply !")
             return redirect(question.get_absolute_url())
 
         if request.POST.get("reply_to"):
@@ -190,28 +183,28 @@ def comment_answer_create(request, question_id):
 
 def answer_rating_up(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
-    user = User.objects.get(pk=request.user.id)
-    answer = Answer.objects.get(pk=answer_id)
-
-    if answer.voting_check(user.id, answer.voting_id):
-        messages.error(request, "You have already left your review for this entry!")
-        return redirect(question.get_absolute_url())
-
-    answer.rating_up(user.id, answer.voting_id)
+    try:
+        answer = Answer.objects.get(id=answer_id)
+        answer.voting.vote_up(request.user.id)
+        messages.success(request, "Your review has been submitted successfully for this entry!")
+    except ObjectDoesNotExist:
+        messages.error(request, f"Question with ID '{answer.id}' doesn't exists")
+    except AlreadyVoted:
+        messages.error(request, "You have already voted on that question!")
 
     return redirect(question.get_absolute_url())
 
 
 def answer_rating_down(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
-    user = User.objects.get(pk=request.user.id)
-    answer = Answer.objects.get(pk=answer_id)
-
-    if answer.voting_check(user.id, answer.voting_id):
-        messages.error(request, "You have already left your review for this entry!")
-        return redirect(question.get_absolute_url())
-
-    answer.rating_down(user.id, answer.voting_id)
+    try:
+        answer = Answer.objects.get(id=answer_id)
+        answer.voting.vote_down(request.user.id)
+        messages.success(request, "Your review has been submitted successfully for this entry!")
+    except ObjectDoesNotExist:
+        messages.error(request, f"Question with ID '{answer.id}' doesn't exists")
+    except AlreadyVoted:
+        messages.error(request, "You have already voted on that question!")
 
     return redirect(question.get_absolute_url())
 
@@ -246,7 +239,7 @@ def update_status(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
     answer = Answer.objects.get(pk=answer_id, question_id=question_id)
     if answer.is_useful:
-        answer.is_useful = None
+        answer.is_useful = False
         answer.save()
         messages.error(request, "Removed helpful response status!")
     else:

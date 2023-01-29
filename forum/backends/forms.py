@@ -3,9 +3,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 # from django.contrib.auth.models import User
 from django.forms import TextInput
-from django_select2 import forms as s2forms
-from .models import Question, Comment, Answer, Tag
-from django.conf.global_settings import DATETIME_INPUT_FORMATS
+
+from .models.answer import Answer
+from .models.question import Question
+from .models.comment import Comment
 
 User = get_user_model()
 
