@@ -24,9 +24,8 @@ class Question(models.Model):
         return self.title
 
     @transaction.atomic
-    def create_question(self, user, request_post, count_up, count_down):
-        if count_up == 0 and count_down == 0:
-            new_voting = Voting.objects.create(count_up=count_up, count_down=count_down)
+    def create_question(self, user, request_post):
+        new_voting = Voting.objects.create(count_up=0, count_down=0)
 
         self.title = request_post['title']
         self.content = request_post['content']
@@ -34,10 +33,9 @@ class Question(models.Model):
         self.voting = new_voting
         super(Question, self).save(request_post)
 
-        list_of_tags = request_post.getlist('tags')
-        for item_tag in list_of_tags:
-            tags = Tag.objects.get(pk=item_tag)
-            self.tag.add(tags)
+        for id_tag in request_post.getlist('tags'):
+            tag = Tag.objects.get(pk=id_tag)
+            self.tag.add(tag)
 
     @transaction.atomic
     def update(self, user, request_post):
@@ -46,10 +44,9 @@ class Question(models.Model):
         self.content = request_post['content']
         self.save(update_fields=['title', 'content'])
 
-        list_of_tags = request_post.getlist('tags')
-        for tag in list_of_tags:
-            tags = Tag.objects.get(pk=tag)
-            self.tag.add(tags)
+        for id_tag in request_post.getlist('tags'):
+            tag = Tag.objects.get(pk=id_tag)
+            self.tag.add(tag)
 
     class Meta:
         app_label = 'backends'

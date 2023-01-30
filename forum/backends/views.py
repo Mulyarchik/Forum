@@ -6,10 +6,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import UserForm, LoginUserForm, QuestionCreate, AnswerCreate, CommentCreate, UserPhotoUpdate
 from .models.answer import Answer
+from .models.comment import Comment
 from .models.question import Question
 from .models.tag import Tag
 from .models.user_voting import User, Voting, AlreadyVoted
-from .models.comment import Comment
 
 
 def user_registation(request):
@@ -76,7 +76,7 @@ def ask_a_guestion(request):
     if request.method == "POST":
         form = QuestionCreate(request.POST)
         if form.is_valid():
-            Question().create_question(user=request.user, request_post=request.POST, count_up=0, count_down=0)
+            Question().create_question(request.user, request.POST)
         else:
             messages.error(request, "Форма не прошла валидацию!")
         return redirect('/')
@@ -145,7 +145,8 @@ def question_rating_down(request, question_id):
 
 def comment_answer_create(request, question_id):
     question = Question.objects.select_related('author', 'voting').get(pk=question_id)
-    answer = Answer.objects.select_related('author', 'voting').all().filter(question_id=question.pk)
+    answer = Answer.objects.select_related('author', 'voting').all().filter(question_id=question.pk).order_by(
+        '-is_useful')
 
     if request.method == "POST":
         if not request.user.is_authenticated:
