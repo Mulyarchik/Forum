@@ -32,7 +32,7 @@
                 <div class="search" id="loginned">
                     <ul class="me-auto mb-lg-0">
                         {% if user.image %}
-                            <img src="{{ user.image.url }}" width="30" height="30">&nbsp;
+                            <img src="{{ user.image.url }}" width="30" style="border-radius: 50px;">&nbsp;
                         {% else %}
                             {% load static %}
                             <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30" height="30"

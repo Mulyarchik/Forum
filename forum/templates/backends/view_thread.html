@@ -53,7 +53,7 @@
                         <footer>
                             <p class="card-text">
                                 {% if question.author.image %}
-                                    <img src="{{ question.author.image.url }}" width="30" height="30">&nbsp;
+                                    <img src="{{ question.author.image.url }}" width="30" style="border-radius: 50px;">&nbsp;
                                 {% else %}
                                     {% load static %}
                                     <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30"
@@ -129,7 +129,7 @@
                                 <div class="col">
                                     <div class="card-text text-end">
                                         <div class="card-text mt-3">
-                                            <img src="/media/green_check.jpg" width="30" height="30" alt="logo">
+                                            <img src="/media/green_check.jpg" width="30"  alt="logo">
                                         </div>
                                     </div>
                                 </div>
@@ -142,7 +142,7 @@
                         <p class="card-text">
                             <small class="text-muted">
                                 {% if answer.author.image %}
-                                    <img src="{{ answer.author.image.url }}" width="30" height="30">&nbsp;
+                                    <img src="{{ answer.author.image.url }}" width="30" style="border-radius: 50px;">&nbsp;
                                 {% else %}
                                     {% load static %}
                                     <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30"
@@ -164,6 +164,12 @@
                                 <a href="{% url 'vlads_app:update_status_comment' question.id answer.id %}"
                                    role="button"
                                    style="text-decoration: none;">&nbsp;&nbsp;Is Useful?</a>
+                                {% if request.user == answer.author %}
+                                <a href="{% url 'vlads_app:update_comment' question.id answer.id 0 %}" role="button"
+                                   style="text-decoration: none;">&nbsp;&nbsp;Update</a>
+                                <a href="{% url 'vlads_app:delete_answer' question.id answer.id %}" role="button"
+                                   style="text-decoration: none;">&nbsp;&nbsp;Delete</a>
+                                {% endif %}
                                 {% if request.user != answer.author %}
                                     <a href="#formreply" style="text-decoration: none;"
                                        onclick="formReply( '{{ answer.author.username }}', '{{ answer.id }}' )">Reply</a>
@@ -193,7 +199,7 @@
                             <p class="card-text">
                                 <small class="text-muted">
                                     {% if comment.author.image %}
-                                        <img src="{{ comment.author.image.url }}" width="30" height="30">&nbsp;
+                                        <img src="{{ comment.author.image.url }}" width="30" style="border-radius: 50px;">&nbsp;
                                     {% else %}
                                         {% load static %}
                                         <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30"
@@ -217,6 +223,13 @@
                                 {% elif request.user != comment.author %}
                                     <a href="#formreply" style="text-decoration: none;"
                                        onclick="formReply('{{ comment.author.username }}', '{{ comment.answer_id }}')">&nbsp;&nbsp;Reply</a>
+                                {% else %}
+                                    <a href="{% url 'vlads_app:update_comment' question.id comment.answer_id comment.id %}"
+                                       role="button"
+                                       style="text-decoration: none;">&nbsp;&nbsp;Update</a>
+                                    <a href="{% url 'vlads_app:delete_comment' question.id question.id comment.id %}"
+                                       role="button"
+                                       style="text-decoration: none;">&nbsp;&nbsp;Delete</a>
                                 {% endif %}
                             </p>
                         </div>

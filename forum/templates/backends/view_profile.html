@@ -9,7 +9,7 @@
         <div class="card mb-3 mt-4">
             <div class="card-body">
                 {% if user.image %}
-                    <img src="{{ user.image.url }}" width="250" height="250" alt="Profile Image">
+                    <img src="{{ user.image.url }}" width="250" alt="Profile Image">
                 {% else %}
                     {% load static %}
                     <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="250" height="250"
