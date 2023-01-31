@@ -96,7 +96,7 @@ def update_question(request, question_id):
     tag = Tag.objects.all()
 
     if request.method == 'GET':
-        if request.user != question.author:
+        if not request.user.is_staff and request.user != question.author:
             messages.error(request, "У вас нету прав для редактирования записи!")
             return redirect(question.get_absolute_url())
         form = QuestionCreate(instance=question)
@@ -220,8 +220,8 @@ def update_comment(request, question_id, answer_id, comment_id):
         answer = get_object_or_404(Comment, pk=comment_id)
 
     if request.method == 'GET':
-        if request.user != answer.author:
-            messages.error(request, "You do not have permission to edit the post!")
+        if not request.user.is_staff and request.user != answer.author:
+            messages.error(request, "You do not have permission to edit the comment!")
             return redirect(question.get_absolute_url())
         form = CommentCreate(instance=answer)
 
@@ -281,7 +281,7 @@ def delete_answer(request, question_id, answer_id):
     question = Question.objects.get(pk=question_id)
     answer = Answer.objects.get(pk=answer_id)
 
-    if request.user.id != answer.author.id:
+    if not request.user.is_staff and request.user.id != answer.author.id:
         messages.error(request, "You do not have permission to delete a comment!")
         return redirect('/login')
     else:
@@ -292,7 +292,8 @@ def delete_answer(request, question_id, answer_id):
 def delete_comment(request, question_id, answer_id, comment_id):
     question = Question.objects.get(pk=question_id)
     comment = Comment.objects.get(pk=comment_id)
-    if request.user != comment.pk:
+
+    if not request.user.is_staff and request.user != comment.author:
         messages.error(request, "You do not have permission to delete a comment!")
         return redirect('/login')
     else:

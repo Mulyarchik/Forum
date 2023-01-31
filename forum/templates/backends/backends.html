@@ -22,7 +22,7 @@
                             <a href="{% url 'vlads_app:profile' question.author.id %}" style="text-decoration: none;">
                                 <p class="card-text"><small class="text-muted">
                                     {% if question.author.image %}
-                                        <img src="{{ question.author.image.url }}" width="30" height="30">
+                                        <img src="{{ question.author.image.url }}" width="30" style="border-radius: 50px;">
                                     {% else %}
                                         {% load static %}
                                         <img src="{% static 'static_files/defoult_prof_pict/img.png' %}" width="30"
