@@ -13,6 +13,7 @@ fi
 
 python manage.py makemigrations
 python manage.py migrate
-#python manage.py setup_test_data
+python manage.py runserver
+
 
 exec "$@"
