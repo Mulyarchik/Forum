@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,12 +19,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-
-SECRET_KEY = 'django-insecure-9mq!v9xw9xz8t(sxd-3)(19ag+i@w07&!&g&kz5-a_!wej(9we'
-
-DEBUG = True
-
-ALLOWED_HOSTS = []
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG = int(os.environ.get("DEBUG", default=0))
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+# SECRET_KEY = 'django-insecure-9mq!v9xw9xz8t(sxd-3)(19ag+i@w07&!&g&kz5-a_!wej(9we'
+#
+# DEBUG = True
+#
+# ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -51,6 +52,15 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
+
+def show_toolbar(request):
+    return True
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+}
+
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
@@ -75,14 +85,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'forum_start.wsgi.application'
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'website_forum',
+#         'USER': 'admin',
+#         'PASSWORD': 'admin',
+#         'HOST': 'db',
+#         'PORT': '5432'
+#     }
+# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'website_forum',
-        'USER': 'admin',
-        'PASSWORD': 'admin',
-        'HOST': '127.0.0.1',
-        'PORT': '5432'
+    "default": {
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", os.path.join(BASE_DIR, "db.sqlite3")),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
 
