@@ -18,6 +18,15 @@ authors of questions, answers
 ![image](assets/erd.drawio.png)
 
 
+# Getting started #
+
+
+``` 
+$ git clone https://github.com/Mulyarchik/website_forum.git
+$ cd website_forum/forum
+```
+
+
 # Screenshots #
 
 Want to see the interface of the site? Check it out!
