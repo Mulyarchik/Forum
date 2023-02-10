@@ -12,15 +12,17 @@ RUN apt-get update \
     && apt-get install -y postgresql postgresql-contrib gcc python3-dev musl-dev
 
 # install dependencies
+
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
-RUN pip install -r requirements.txt
 
-# copy entrypoint.sh
+RUN pip install virtualenv && virtualenv -p python /app/venv
+RUN pip install --user -r requirements.txt
+#copy entrypoint.sh
 COPY ./entrypoint.sh .
 
 # copy project
 COPY . .
 
-# run entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]

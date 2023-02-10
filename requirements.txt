@@ -4,3 +4,4 @@ psycopg2-binary==2.9.3
 django-debug-toolbar==3.8.1
 Faker==16.6.1
 factory_boy==3.2.1
+python-decouple==3.7
