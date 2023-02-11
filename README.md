@@ -33,6 +33,12 @@ Optionally you can populate your database with some dummy data.
 $ docker compose exec web python manage.py setup_test_data
 ```
 
+Open in your browser:
+
+```
+http://localhost:8080/
+```
+
 
 # Business processes: #
 
