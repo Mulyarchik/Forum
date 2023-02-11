@@ -9,6 +9,27 @@ authors of questions, answers
 * Django 4.1
 * Python 3.10
 
+
+# Getting started #
+
+Clone the repository and enter into it.
+
+``` 
+$ git clone https://github.com/Mulyarchik/website_forum.git
+$ cd website_forum
+```
+
+Set your settings in the ‘.env’ file, but defaults is enough just to try the service locally.
+
+Run docker compose to build and run the service and it’s dependencies.
+
+```$ docker compose up -d --build```
+
+Optionally you can populate your database with some dummy data.
+
+```$ docker compose exec web python manage.py setup_test_data```
+
+
 # Business processes: #
 
 ![image](assets/business_processes.png)
@@ -16,15 +37,6 @@ authors of questions, answers
 # ERD: #
 
 ![image](assets/erd.drawio.png)
-
-
-# Getting started #
-
-
-``` 
-$ git clone https://github.com/Mulyarchik/website_forum.git
-$ cd website_forum/forum
-```
 
 
 # Screenshots #

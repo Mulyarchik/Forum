@@ -61,7 +61,7 @@ def user_logout(request):
 
 
 def backends(request):
-    question = Question.objects.select_related('author', 'voting').order_by('-created_at')
+    question = Question.objects.select_related('author', 'voting').prefetch_related('tag').order_by('-created_at')
 
     return render(request, 'backends/backends.html', {'questions': question})
 
@@ -255,7 +255,7 @@ def view_profile(request, user_id):
     user = User.objects.get(pk=user_id)
 
     if not request.user.is_authenticated:
-        messages.error(request, "You must be logged in to view your profile!")
+        messages.error(request, "You must be logged in to view profile!")
         return redirect('/login')
 
     if request.method == "POST":

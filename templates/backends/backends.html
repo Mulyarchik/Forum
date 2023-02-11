@@ -9,8 +9,8 @@
             <div class="card mb-3 mt-4">
                 {% if question.tag %}
                     <div class="card-header">
-                        {% for question_tag in question.tag.all %}
-                            {{ question_tag.name }};
+                        {% for tag in question.tag.all %}
+                            {{ tag.name }};
                         {% endfor %}
                     </div>
                 {% endif %}
