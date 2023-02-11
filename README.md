@@ -23,11 +23,15 @@ Set your settings in the ‘.env’ file, but defaults is enough just to try the
 
 Run docker compose to build and run the service and it’s dependencies.
 
-```$ docker compose up -d --build```
+```
+$ docker compose up -d --build
+```
 
 Optionally you can populate your database with some dummy data.
 
-```$ docker compose exec web python manage.py setup_test_data```
+```
+$ docker compose exec web python manage.py setup_test_data
+```
 
 
 # Business processes: #
