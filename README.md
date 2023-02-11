@@ -15,8 +15,8 @@ authors of questions, answers
 Clone the repository and enter into it.
 
 ``` 
-$ git clone https://github.com/Mulyarchik/website_forum.git
-$ cd website_forum
+$ git clone https://github.com/Mulyarchik/forum.git
+$ cd forum
 ```
 
 Set your settings in the ‘.env’ file, but defaults is enough just to try the service locally.
